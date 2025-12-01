@@ -98,114 +98,132 @@ const About = () => {
 
     
 
-        <div className='bg-[#FFFFFF] xl:pt-[150px] md:pt-[60px] pt-9 md:pb-[120px] pb-[60px]' >
-            <h1 className={`text-[#CC2630] font-medium xl:text-[56px] md:text-[42px] text-[16px] ${manual.className} md:px-[80px] px-7 xl:px-[120px] md:pb-[48px] xl:pb-10 pb-6`} >Our Value Proposition</h1>
-            <div className='relative w-full' >
+<div className="bg-[#FFFFFF] xl:pt-[150px] md:pt-[60px] pt-9 md:pb-[120px] pb-[60px]">
+      <h1
+        className={`text-[#CC2630] font-medium xl:text-[56px] md:text-[42px] text-[16px] ${manual.className} md:px-[80px] px-7 xl:px-[120px] md:pb-[48px] xl:pb-10 pb-6`}
+      >
+        Our Value Proposition
+      </h1>
+      <div className="relative w-full">
+        {/* Adjusted the image size and positioning for better responsiveness */}
+        <Image
+          src="./../OBJECTS (1).svg"
+          priority={true}
+          width={1041}
+          height={772}
+          alt="Background decoration"
+          className="absolute z-[0] overflow-hidden max-w-[40%] right-[5%] top-[10%] phone:hidden phoneTab:hidden xl:block"
+        />
+        {/* Added max-width and centered the content for better layout on larger screens */}
+        <div className="relative flex xl:flex-row flex-col items-center xl:px-[120px] xl:gap-x-[63px] xl:justify-center max-w-[1600px] mx-auto">
+          {/* Adjusted the circular background size for better proportions on larger screens */}
+          <div className="md:h-[550px] md:w-[550px] xl:h-[600px] xl:w-[600px] h-[200px] w-[200px] rounded-full bg-[#CC263012] relative flex-shrink-0">
+            <Image
+              src="./../Frame 120.svg"
+              alt="Central icon"
+              priority={true}
+              width={350}
+              height={350}
+              className="md:w-[350px] md:h-[350px] h-[120px] w-[120px] absolute left-[20.833333%] top-[20.833333%]"
+            />
+            {/* Adjusted positioning of floating elements for better layout on larger screens */}
+            <div className="absolute top-[55%] md:top-[-5%] left-[50%] bg-white w-[150px] md:w-[250px] h-[24px] md:h-[52px] rounded-[90px] z-[5] content-shadow py-2 px-6 flex items-center gap-x-2">
+              <Image
+                src="./../career-path 1.svg"
+                alt="Career Development icon"
+                priority={true}
+                width={36}
+                height={36}
+                className="md:w-[36px] md:h-[36px] w-[16px] h-[16px]"
+              />
+              <p className="md:text-[16px] md:leading-[32px] text-[8px] leading-[12px]">Career Development</p>
+            </div>
+            <div className="absolute top-0 md:top-[40%] left-[25%] md:left-[-15%] bg-white w-[150px] md:w-[250px] h-[24px] md:h-[52px] rounded-[90px] z-[5] content-shadow py-2 px-6 flex items-center gap-x-4">
+              <Image
+                src="./../entrepreneur 1.svg"
+                alt="Entrepreneurship icon"
+                priority={true}
+                width={36}
+                height={36}
+                className="md:w-[36px] md:h-[36px] w-[16px] h-[16px]"
+              />
+              <p className="md:text-[16px] md:leading-[32px] text-[8px] leading-[12px]">Entrepreneurship</p>
+            </div>
+            <div className="absolute bottom-0 md:bottom-[10%] md:left-[-8%] left-[-20%] bg-white w-[150px] md:w-[250px] h-[24px] md:h-[52px] rounded-[90px] z-[5] content-shadow py-2 px-6 flex items-center gap-x-4">
+              <Image
+                src="./../leadership 1.svg"
+                alt="Leadership icon"
+                priority={true}
+                width={36}
+                height={36}
+                className="md:w-[36px] md:h-[36px] w-[16px] h-[16px]"
+              />
+              <p className="md:text-[16px] md:leading-[32px] text-[8px] leading-[12px]">Leadership</p>
+            </div>
+          </div>
+          {/* Adjusted the text content area for better readability and layout on larger screens */}
+          <div className="xl:w-[570px] xl:max-w-[50%] hidden phone:flex xl:flex flex-col gap-y-6 xl:gap-y-9 phone:pt-[72px] phone:px-7 xl:pt-[24px]">
+            <div>
+
+
+            
+              <div className="flex items-center gap-x-4">
                 <Image
-                    src="./../OBJECTS (1).svg"
-                    // fill={true}
-                    // style={{ objectFit: "contain" }}
-                    // objectPosition="center center"
-                    // layout="fill"
-                    // objectFit="contain"
-                    // objectPosition="center center"
-                    priority={true}
-                    width={1041}
-                    height={772}
-                    alt="Your alt text"
-                    className="absolute z-[0] overflow-hidden max-w-[45%] right-[10%] phone:hidden phoneTab:hidden"
+                  src="./../career-path 1.svg"
+                  alt="Career Development icon"
+                  priority={true}
+                  width={56}
+                  height={56}
+                  className="md:w-[56px] md:h-[56px] w-[24px] h-[24px]"
                 />
-                <div className='relative flex xl:flex-row flex-col items-center xl:px-[120px] xl:gap-x-[63px] xl:justify-center' >
-                    <div className='md:h-[600px] md:w-[600px] h-[200px] w-[200px] rounded-full bg-[#CC263012] relative' >
-                        <Image
-                            src="./../Frame 120.svg"
-                            alt="Your alt text"
-                            priority={true}
-                            width={350}
-                            height={350}
-                            className='md:w-[350px] md:h-[350px] h-[120px] w-[120px] absolute left-[20.833333%] top-[20.833333%]'
-                        />
-                        <div className='absolute top-[55%] md:top-0 left-[50%] bg-white w-[150px] md:w-[250px] h-[24px] md:h-[52px] rounded-[90px] z-[5] content-shadow py-2 px-6 flex items-center gap-x-2' >
-                            <Image
-                                src="./../career-path 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[16px] h-[16px]'
-                            />
-                            <p className='md:text-[16px] md:leading-[32px] text-[8px] leading-[12px]' >Career Development</p>
-                        </div>
-                        <div className='absolute top-0 md:top-[40%] left-[25%] md:left-[-12%] bg-white w-[150px] md:w-[250px] h-[24px] md:h-[52px] rounded-[90px] z-[5] content-shadow py-2 px-6 flex items-center gap-x-4' >
-                            <Image
-                                src="./../entrepreneur 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[16px] h-[16px]'
-                            />
-                            <p className='md:text-[16px] md:leading-[32px] text-[8px] leading-[12px]' >Entrepreneurship</p>
-                        </div>
-                        <div className='absolute bottom-0 md:bottom-[10%] md:left-0 left-[-20%] bg-white w-[150px] md:w-[250px] h-[24px] md:h-[52px] rounded-[90px] z-[5] content-shadow py-2 px-6 flex items-center gap-x-4' >
-                            <Image
-                                src="./../leadership 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[16px] h-[16px]'
-                            />
-                            <p className='md:text-[16px] md:leading-[32px] text-[8px] leading-[12px]' >Leadership</p>
-                        </div>
-                    </div>
-                    <div className='xl:w-[570px] hidden phone:flex xl:flex flex-col gap-y-9 phone:pt-[72px] phone:px-7' >
-                        <div>
-                            <div className='flex items-center gap-x-4' >
-                                <Image
-                                    src="./../career-path 1.svg"
-                                    alt="Your alt text"
-                                    priority={true}
-                                    width={56}
-                                    height={56}
-                                    className='md:w-[56px] md:h-[56px] w-[24px] h-[24px]'
-                                />
-                                <h2 className='font-bold text-[12px] phone:leading-[24px] md:text-2xl pb-2' >Career Development</h2>
-                            </div>
-                            <p className='font-normal md:leading-[40px] md:text-[20px] text-[10px] leading-[24px] text-[#777777]' >We offer access to cutting edge career exposition and transition opportunities. These includes Career Exposition, Career Transition, Mentorship, Learning Platform.</p>
-                        </div>
-                        <div>
-                            <div className='flex items-center gap-x-4' >
-                                <Image
-                                    src="./../leadership 1.svg"
-                                    alt="Your alt text"
-                                    priority={true}
-                                    width={56}
-                                    height={56}
-                                    className='md:w-[56px] md:h-[56px] w-[24px] h-[24px]'
-                                />
-                                <h2 className='font-bold text-[12px] phone:leading-[24px] md:text-2xl pb-2' >Leadership</h2>
-                            </div>
-                            <p className='font-normal md:leading-[40px] md:text-[20px] text-[10px] leading-[24px] text-[#777777]' >We offer you the opportunity to enhance and harness the power of true leadership. These include; Leadership, Leadership Expo, Mentorship, Training, Social Impact.</p>
-                        </div>
-                        <div>
-                            <div className='flex items-center gap-x-4' >
-                                <Image
-                                    src="./../entrepreneur 1.svg"
-                                    alt="Your alt text"
-                                    priority={true}
-                                    width={56}
-                                    height={56}
-                                    className='md:w-[56px] md:h-[56px] w-[24px] h-[24px]'
-                                />
-                                <h2 className='font-bold text-[12px] phone:leading-[24px] md:text-2xl pb-2' >Enterpreneurship</h2>
-                            </div>
-                            <p className='font-normal md:leading-[40px] md:text-[20px] text-[10px] leading-[24px] text-[#777777]' >We offer access to platform and network that help budding startups grow and build. These includes; Entrepreneurial Mindset , Startup Network, Funding, Incubators x Hackathons.</p>
-                        </div>
-                        <div className='phone:flex justify-center' >
-                            <Button/>
-                        </div>
-                    </div>
+                <h2 className="font-bold text-[12px] phone:leading-[24px] md:text-2xl pb-2">Career Development</h2>
+              </div>
+              <p className="font-normal md:leading-[40px] md:text-[20px] text-[10px] leading-[24px] text-[#777777]">
+                We offer access to cutting edge career exposition and transition opportunities. These includes Career
+                Exposition, Career Transition, Mentorship, Learning Platform.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center gap-x-4">
+                <Image
+                  src="./../leadership 1.svg"
+                  alt="Leadership icon"
+                  priority={true}
+                  width={56}
+                  height={56}
+                  className="md:w-[56px] md:h-[56px] w-[24px] h-[24px]"
+                />
+                <h2 className="font-bold text-[12px] phone:leading-[24px] md:text-2xl pb-2">Leadership</h2>
+              </div>
+              <p className="font-normal md:leading-[40px] md:text-[20px] text-[10px] leading-[24px] text-[#777777]">
+                We offer you the opportunity to enhance and harness the power of true leadership. These include;
+                Leadership, Leadership Expo, Mentorship, Training, Social Impact.
+              </p>
+            </div>
+            <div>
+              <div className="flex items-center gap-x-4">
+                <Image
+                  src="./../entrepreneur 1.svg"
+                  alt="Entrepreneurship icon"
+                  priority={true}
+                  width={56}
+                  height={56}
+                  className="md:w-[56px] md:h-[56px] w-[24px] h-[24px]"
+                />
+                <h2 className="font-bold text-[12px] phone:leading-[24px] md:text-2xl pb-2">Entrepreneurship</h2>
+              </div>
+              <p className="font-normal md:leading-[40px] md:text-[20px] text-[10px] leading-[24px] text-[#777777]">
+                We offer access to platform and network that help budding startups grow and build. These includes;
+                Entrepreneurial Mindset , Startup Network, Funding, Incubators x Hackathons.
+              </p>
+            </div>
+            <div className="phone:flex justify-center">
+              <Button />
+            </div>
+          </div>
+
+
+
                     <div className='hidden md:block xl:hidden px-20 pt-[60px]' >
                         <div className='flex gap-x-10' >
                             <div>
@@ -319,6 +337,8 @@ const About = () => {
                     className="absolute"
                 />
             </div>
+
+
 
 
             <div className='w-full min-h-screen relative z-10 xl:px-[120px] md:px-20 xl:py-[138px] md:py-24 py-9 px-7'>
