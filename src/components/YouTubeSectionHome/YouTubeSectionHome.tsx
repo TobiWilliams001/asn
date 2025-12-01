@@ -5,29 +5,54 @@ import Image from 'next/image'
 
 const YouTubeSectionHome = () => {
   return (
-    <div className='bg-[#FFF6F6] xl:py-[150px] xl:px-[120px] py-9 px-7 md:p-[80px] relative h-full overflow-hidden flex flex-col' >
-        <Image
-            src="./../OBJECTS (2).svg"
-            priority={true}
-            width={1041}
-            height={1120}
-            alt="Your alt text"
-            className="absolute z-[0] overflow-hidden max-w-[50%] right-[0] top-[0]"
-        />
-        <div className='youtube_home_cont xl:py-[76px] xl:px-[100px] py-[18px] px-[21px] md:px-[60px] md:pt-[50px] md:pb-[44.75px] z-[1]' >
-            <div className='flex justify-center items-center phone:gap-x-[0.066px]' >
-                <div className='flex flex-col md:gap-y-[20.903px] xl:gap-y-9 gap-y-[7.718px] justify-center items-start' >
-                    <div className='flex flex-col xl:gap-y-4 gap-y-[3.43px] md:gap-y-[9.29px] items-start' >
-                        <p className={`font-medium xl:text-[64px] xl:leading-[100px] md:text-[32px] md:leading-[42px] text-[12px] leading-[16px] text-white ${manual.className}`} >Catch up on our latest Webinar and events. </p>
-                        <p className={`xl:text-[24px] xl:leading-[48px] md:text-[16px] md:leading-[28px] text-[6px] leading-[10px] text-white`} >Check out our Youtube channel, learn more about the organisation and bine watch our previous online events.</p>
-                    </div>
-                    <button className='phone:bg-white xl:bg-white xl:h-[72px] xl:w-[440px] w-[95px] h-[14px] phone:py-1 phone:px-2 xl:rounded-[1000px] rounded-[200px] xl:p-6 xl:text-[24px] md:text-[#FFFDF6] phone:text-[#CC2630] xl:text-[#CC2630] xl:leading-[24px] text-[6px] leading-[6px] md:text-[16px] md:leading-[16px] md:px-6 md:py-3 md:rounded-[500px] phoneTab:border phoneTab:border-[#FFF] phoneTab:w-[260px] phoneTab:h-[40px]' >Get Involved</button>
-                </div>
-                <div className='bg-[#1B0000] xl:h-[400px] xl:w-[586px] md:w-[341px] md:h-[233px] phone:h-[86px] phone:w-[126px] flex items-center justify-center' >
-                <a href={`https://www.youtube.com/@africanstudentsnetwork`} target='_blank' ><Image priority={true} src="./../yaotube 1.svg" height={176} width={176} alt="blog-card" className="xl:max-w-[176px] xl:max-h-[176px] phone:max-w-[38px] phone:max-h-[38px] md:w-[103px] md:h-[103px]" /></a>
-                </div>
+    <div className='bg-[#FFF6F6] relative overflow-hidden flex flex-col py-12 px-7 sm:p-16 md:p-24 xl:py-[150px] xl:px-[120px]'>
+      {/* Background pattern */}
+      <Image
+        src="./../OBJECTS (2).svg"
+        priority={true}
+        width={1041}
+        height={1120}
+        alt="Background decoration"
+        className="absolute z-0 max-w-[50%] right-0 top-0"
+      />
+      
+      {/* Main content container with gradient background */}
+      <div className='youtube_home_cont relative z-10 rounded-[32px] py-12 px-8 sm:p-12 md:px-16 md:py-16 xl:py-24 xl:px-28'>
+        <div className='flex flex-col md:flex-row items-start justify-between gap-8 md:gap-12 xl:gap-16'>
+          {/* Text content */}
+          <div className='flex flex-col gap-4 md:gap-6 xl:gap-8 md:max-w-[55%]'>
+            <div className='space-y-3 md:space-y-4'>
+            <h2 className={`font-medium text-white text-2xl sm:text-3xl md:text-[42px] xl:text-[56px] leading-snug sm:leading-normal md:leading-[48px] xl:leading-[64px] tracking-[-0.02em] ${manual.className}`}>
+  Catch up on our latest Webinar and events.
+</h2>
+
+              <p className={`text-white/90 text-sm sm:text-base md:text-lg xl:text-xl leading-[1.6] max-w-[95%]`}>
+                Check out our Youtube channel, learn more about the organisation and bine watch our previous online events.
+              </p>
             </div>
+            <button className='bg-white text-[#CC2630] rounded-full py-3 px-6 sm:py-4 sm:px-8 md:py-5 md:px-10 xl:py-6 xl:px-12 text-base sm:text-lg md:text-xl xl:text-2xl font-medium transition-colors hover:bg-[#CC2630] hover:text-white w-full md:w-auto'>
+              Get Involved
+            </button>
+          </div>
+
+          {/* YouTube container */}
+          <div className='bg-[#0A0000] flex items-center justify-center w-full md:w-[40%] aspect-[4/3] rounded-2xl overflow-hidden shadow-lg'>
+            <a href="https://www.youtube.com/@africanstudentsnetwork" 
+               target='_blank' 
+               rel="noopener noreferrer" 
+               className="flex items-center justify-center w-full h-full hover:scale-105 transition-transform">
+              <Image 
+                priority={true} 
+                src="./../yaotube 1.svg" 
+                height={176} 
+                width={176} 
+                alt="YouTube channel link" 
+                className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 xl:w-28 xl:h-28"
+              />
+            </a>
+          </div>
         </div>
+      </div>
     </div>
   )
 }

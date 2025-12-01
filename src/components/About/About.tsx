@@ -319,147 +319,167 @@ const About = () => {
                     className="absolute"
                 />
             </div>
-            <div className='w-full h-full relative z-10 xl:px-[120px] md:px-20 xl:py-[138px] md:py-24 py-9 px-7' >
-                <h1 className={`text-[#CC2630] font-medium xl:leading-[57px] xl:text-[56px] md:text-[42px] md:leading-[42px] text-[16px] leading-[12.37px] ${manual.className} xl:pb-11 md:pb-7 pb-2`} >Our Programs</h1>
-                <div className='py-6' >
-                    <div className='flex md:gap-x-[50px] xl:gap-x-[60px] md:gap-y-[60px] gap-y-[36px] flex-wrap gap-x-5' >
-                        <div className='md:w-[400px] md:max-h-[600px] w-[150px]' >
-                            <Image
-                                src="./../up-arrow 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[24px] h-[24px]'
-                            />
-                            <h1 className='font-bold md:text-[20px] text-[12px] md:leading-[64px] leading-[24px]' >African Students’ Accelerator Program</h1>
-                            <p className='text-[#777777] md:text-[16px] text-[8px] md:leading-[32px] leading-[20px] ' >African Students’ Accelerator Program is designed to equip African students for global relevance and impact central to career development, entrepreneurship and leadership in any frontier of the continent and the world at large. The program seeks to build a viable network of change makers among African students across diverse universities, who are hungry for growth and development to aid their trajectory into their respective sphere of influence and for sustainable local and global impact.</p>
-                        </div>
-                        <div className='md:w-[400px] md:max-h-[600px] w-[150px]' >
-                            <Image
-                                src="./../impact 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[24px] h-[24px]'
-                            />
-                            <h1 className='font-bold md:text-[20px] text-[12px] md:leading-[64px] leading-[24px]' >African Social Impact Program</h1>
-                            <p className='text-[#777777] md:text-[16px] text-[8px] md:leading-[32px] leading-[20px] ' >The African Social Impact Program (ASIP) is a transformative initiative designed to empower individuals with the knowledge, skills, and experiences needed to drive positive change in communities across Africa. Grounded in the belief that sustainable impact is achieved through collaborative, innovative solutions, ASIP brings together a diverse group of passionate individuals eager to make a difference.</p>
-                        </div>
-                        <div className='md:w-[400px] md:max-h-[600px] w-[150px]' >
-                            <Image
-                                src="./../start-up 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[24px] h-[24px]'
-                            />
-                            <h1 className='font-bold md:text-[20px] text-[12px] md:leading-[64px] leading-[24px]' >African Startup Foundry</h1>
-                            <p className='text-[#777777] md:text-[16px] text-[8px] md:leading-[32px] leading-[20px] ' >The African Startup Foundry is a program that supports and nurtures startups in Africa, providing resources, mentorship, funding, and a supportive ecosystem to help new businesses thrive. The goal is to assist startups in their early stages.</p>
-                        </div>
-                        <div className='md:w-[400px] md:max-h-[600px] w-[150px]' >
-                            <Image
-                                src="./../insights 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[24px] h-[24px]'
-                            />
-                            <h1 className='font-bold md:text-[20px] text-[12px] md:leading-[64px] leading-[24px]' >Monthly Industry Insight Series</h1>
-                            <p className='text-[#777777] md:text-[16px] text-[8px] md:leading-[32px] leading-[20px] ' >The Monthly Industry Insight Series is a monthly webinar to better equip African students with career and leadership skills, ensuring their readiness for the job market, cutting across different industries from technology to finance to health, and many more.</p>
-                        </div>
-                        <div className='md:w-[400px] md:max-h-[600px] w-[150px]' >
-                            <Image
-                                src="./../speech-bubbles 1.svg"
-                                alt="Your alt text"
-                                priority={true}
-                                width={36}
-                                height={36}
-                                className='md:w-[36px] md:h-[36px] w-[24px] h-[24px]'
-                            />
-                            <h1 className='font-bold md:text-[20px] text-[12px] md:leading-[64px] leading-[24px]' >Monthly Webinar - Speaker Series</h1>
-                            <p className='text-[#777777] md:text-[16px] text-[8px] md:leading-[32px] leading-[20px] ' >The Monthly Webinar Series is held once a month, where we have well seasoned speakers to cover a variety of subjects and provide valuable information, updates, or insights to African students.</p>
-                        </div>
-                        <div className='phone:flex justify-center phone:h-[240px] items-center' >
-                            <Button/>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+
+            <div className='w-full min-h-screen relative z-10 xl:px-[120px] md:px-20 xl:py-[138px] md:py-24 py-9 px-7'>
+  <h1 className={`text-[#CC2630] font-medium text-2xl sm:text-3xl md:text-[42px] xl:text-[56px] leading-tight sm:leading-normal md:leading-[42px] xl:leading-[57px] ${manual.className} pb-4 sm:pb-6 md:pb-7 xl:pb-11`}>
+    Our Programs
+  </h1>
+  <div className='py-6'>
+    <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12 xl:gap-[60px]'>
+      <div className='w-full'>
+        <Image
+          src="./../up-arrow 1.svg"
+          alt="African Students' Accelerator Program icon"
+          priority={true}
+          width={36}
+          height={36}
+          className='w-6 h-6 md:w-9 md:h-9'
+        />
+        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>African Students' Accelerator Program</h1>
+        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>African Students' Accelerator Program is designed to equip African students for global relevance and impact central to career development, entrepreneurship and leadership in any frontier of the continent and the world at large. The program seeks to build a viable network of change makers among African students across diverse universities, who are hungry for growth and development to aid their trajectory into their respective sphere of influence and for sustainable local and global impact.</p>
+      </div>
+
+      <div className='w-full'>
+        <Image
+          src="./../impact 1.svg"
+          alt="African Social Impact Program icon"
+          priority={true}
+          width={36}
+          height={36}
+          className='w-6 h-6 md:w-9 md:h-9'
+        />
+        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>African Social Impact Program</h1>
+        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>The African Social Impact Program (ASIP) is a transformative initiative designed to empower individuals with the knowledge, skills, and experiences needed to drive positive change in communities across Africa. Grounded in the belief that sustainable impact is achieved through collaborative, innovative solutions, ASIP brings together a diverse group of passionate individuals eager to make a difference.</p>
+      </div>
+
+      <div className='w-full'>
+        <Image
+          src="./../start-up 1.svg"
+          alt="African Startup Foundry icon"
+          priority={true}
+          width={36}
+          height={36}
+          className='w-6 h-6 md:w-9 md:h-9'
+        />
+        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>African Startup Foundry</h1>
+        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>The African Startup Foundry is a program that supports and nurtures startups in Africa, providing resources, mentorship, funding, and a supportive ecosystem to help new businesses thrive. The goal is to assist startups in their early stages.</p>
+      </div>
+
+      <div className='w-full'>
+        <Image
+          src="./../insights 1.svg"
+          alt="Monthly Industry Insight Series icon"
+          priority={true}
+          width={36}
+          height={36}
+          className='w-6 h-6 md:w-9 md:h-9'
+        />
+        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>Monthly Industry Insight Series</h1>
+        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>The Monthly Industry Insight Series is a monthly webinar to better equip African students with career and leadership skills, ensuring their readiness for the job market, cutting across different industries from technology to finance to health, and many more.</p>
+      </div>
+
+      <div className='w-full'>
+        <Image
+          src="./../speech-bubbles 1.svg"
+          alt="Monthly Webinar - Speaker Series icon"
+          priority={true}
+          width={36}
+          height={36}
+          className='w-6 h-6 md:w-9 md:h-9'
+        />
+        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>Monthly Webinar - Speaker Series</h1>
+        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>The Monthly Webinar Series is held once a month, where we have well seasoned speakers to cover a variety of subjects and provide valuable information, updates, or insights to African students.</p>
+      </div>
+
+      <div className='flex justify-center items-center h-full'>
+        <Button />
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+
+
         
-        <div ref={reachRef} className='our-reach relative xl:px-[120px] md:px-20 xl:py-[138px] md:py-24 py-9 px-7' >
-            <h1 className={`text-[#CC2630] font-medium xl:leading-[57px] xl:text-[56px] md:text-[42px] md:leading-[42px] text-[16px] leading-[12.37px] ${manual.className} xl:pb-11 md:pb-7 pb-2`} >Our Reach so Far</h1>
-            <div className='flex flex-wrap gap-x-[70px] md:gap-x-[120px] gap-y-9 py-6' >
-                <div className='flex flex-col items-center gap-y-1' >
-                    <div className='bg-[#CC263015] h-[108px] w-[108px] md:h-[128px] md:w-[128px] rounded-full flex items-center justify-center' >
-                        <Image
-                            src="./../student-hat 1.svg"
-                            alt="Your alt text"
-                            priority={true}
-                            width={80}
-                            height={80}
-                            className='md:w-[80px] md:h-[80px] w-[60x] h-[60x]'
-                        />
-                    </div>
-                    <p className='text-center font-bold text-[20px] leading-[24px] md:text-[48px] md:leading-[57px]' >
-                    {startCount ? <CountUp start={0} end={1500} duration={2.5} suffix="+" /> : '1500+'}
-                    </p>
-                    <p className='text-center text-[12px] leading-[24px] md:text-[24px] md:leading-[57px]' >Students reached</p>
-                </div>
-                <div className='flex flex-col items-center gap-y-1' >
-                    <div className='bg-[#CC263015] h-[108px] w-[108px] md:h-[128px] md:w-[128px] rounded-full flex items-center justify-center' >
-                        <Image
-                            src="./../africa 1.svg"
-                            alt="Your alt text"
-                            priority={true}
-                            width={80}
-                            height={80}
-                            className='md:w-[80px] md:h-[80px] w-[60x] h-[60x]'
-                        />
-                    </div>
-                    <p className='text-center font-bold text-[20px] leading-[24px] md:text-[48px] md:leading-[57px]' >
-                        {startCount ? <CountUp start={0} end={10} duration={2.7} suffix="+" /> : '10+'}
-                        </p>
-                    <p className='text-center text-[12px] leading-[24px] md:text-[24px] md:leading-[57px]' > African countries</p>
-                </div> 
-                <div className='flex flex-col items-center gap-y-1' >
-                    <div className='bg-[#CC263015] h-[108px] w-[108px] md:h-[128px] md:w-[128px] rounded-full flex items-center justify-center' >
-                        <Image
-                            src="./../localization 1.svg"
-                            alt="Your alt text"
-                            priority={true}
-                            width={80}
-                            height={80}
-                            className='md:w-[80px] md:h-[80px] w-[60x] h-[60x]'
-                        />
-                    </div>
-                    <p className='text-center font-bold text-[20px] leading-[24px] md:text-[48px] md:leading-[57px]' >
-                        {startCount ? <CountUp start={0} end={8} duration={2.7} suffix="+" /> : '8+'}
-                        </p>
-                    <p className='text-center text-[12px] leading-[24px] md:text-[24px] md:leading-[57px]' >Global Speakers</p>
-                </div>
-                <div className='flex flex-col items-center gap-y-1' >
-                    <div className='bg-[#CC263015] h-[108px] w-[108px] md:h-[128px] md:w-[128px] rounded-full flex items-center justify-center' >
-                        <Image
-                            src="./../university-building 1.svg"
-                            alt="Your alt text"
-                            priority={true}
-                            width={80}
-                            height={80}
-                            className='md:w-[80px] md:h-[80px] w-[60x] h-[60x]'
-                        />
-                    </div>
-                    <p className='text-center font-bold text-[20px] leading-[24px] md:text-[48px] md:leading-[57px]' >
-                    {startCount ? <CountUp start={0} end={20} duration={2.7} suffix="+" /> : '20+'}
-                        </p>
-                    <p className='text-center text-[12px] leading-[24px] md:text-[24px] md:leading-[57px]' >Universities </p>
-                </div>
-            </div>
-        </div>
+<div ref={reachRef} className='our-reach relative w-full px-4 sm:px-6 md:px-20 xl:px-[120px] py-9 md:py-24 xl:py-[138px]'>
+  <h1 className={`text-[#CC2630] font-medium text-2xl sm:text-3xl md:text-[42px] xl:text-[56px] leading-tight sm:leading-normal md:leading-[42px] xl:leading-[57px] ${manual.className} pb-4 sm:pb-6 md:pb-7 xl:pb-11`}>
+    Our Reach so Far
+  </h1>
+  
+  <div className='grid grid-cols-2 md:grid-cols-4 gap-6 md:gap-8 xl:gap-[70px] py-6'>
+    <div className='flex flex-col items-center gap-y-2 md:gap-y-4'>
+      <div className='bg-[#CC263015] h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center'>
+        <Image
+          src="./../student-hat 1.svg"
+          alt="Students reached icon"
+          priority={true}
+          width={80}
+          height={80}
+          className='w-16 h-16 md:w-20 md:h-20'
+        />
+      </div>
+      <p className='text-center font-bold text-xl md:text-3xl xl:text-5xl'>
+        {startCount ? <CountUp start={0} end={1500} duration={2.5} suffix="+" /> : '1500+'}
+      </p>
+      <p className='text-center text-sm md:text-base xl:text-2xl'>Students reached</p>
+    </div>
+
+    <div className='flex flex-col items-center gap-y-2 md:gap-y-4'>
+      <div className='bg-[#CC263015] h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center'>
+        <Image
+          src="./../africa 1.svg"
+          alt="African countries icon"
+          priority={true}
+          width={80}
+          height={80}
+          className='w-16 h-16 md:w-20 md:h-20'
+        />
+      </div>
+      <p className='text-center font-bold text-xl md:text-3xl xl:text-5xl'>
+        {startCount ? <CountUp start={0} end={10} duration={2.7} suffix="+" /> : '10+'}
+      </p>
+      <p className='text-center text-sm md:text-base xl:text-2xl'>African countries</p>
+    </div>
+
+    <div className='flex flex-col items-center gap-y-2 md:gap-y-4'>
+      <div className='bg-[#CC263015] h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center'>
+        <Image
+          src="./../localization 1.svg"
+          alt="Global Speakers icon"
+          priority={true}
+          width={80}
+          height={80}
+          className='w-16 h-16 md:w-20 md:h-20'
+        />
+      </div>
+      <p className='text-center font-bold text-xl md:text-3xl xl:text-5xl'>
+        {startCount ? <CountUp start={0} end={8} duration={2.7} suffix="+" /> : '8+'}
+      </p>
+      <p className='text-center text-sm md:text-base xl:text-2xl'>Global Speakers</p>
+    </div>
+
+    
+    <div className='flex flex-col items-center gap-y-2 md:gap-y-4'>
+      <div className='bg-[#CC263015] h-24 w-24 md:h-32 md:w-32 rounded-full flex items-center justify-center'>
+        <Image
+          src="./../university-building 1.svg"
+          alt="Universities icon"
+          priority={true}
+          width={80}
+          height={80}
+          className='w-16 h-16 md:w-20 md:h-20'
+        />
+      </div>
+      <p className='text-center font-bold text-xl md:text-3xl xl:text-5xl'>
+        {startCount ? <CountUp start={0} end={20} duration={2.7} suffix="+" /> : '20+'}
+      </p>
+      <p className='text-center text-sm md:text-base xl:text-2xl'>Universities</p>
+    </div>
+  </div>
+</div>
         {/* <Impact /> */}
         <Donation />
         <BlogSectionHome />
