@@ -1,15 +1,18 @@
 // components/Button/DonateButton.tsx
 "use client";
 
+import { useRouter } from 'next/navigation';
 import React from 'react';
 
 const DonateButton = () => {
+  const router = useRouter();
   const handleClick = () => {
     // Scroll smoothly to the Donation section
-    const donationSection = document.getElementById("donation");
-    if (donationSection) {
-      donationSection.scrollIntoView({ behavior: "smooth" });
-    }
+    // const donationSection = document.getElementById("donation");
+    // if (donationSection) {
+    //   donationSection.scrollIntoView({ behavior: "smooth" });
+    // }
+    router.push('/donate');
   };
 
   return (

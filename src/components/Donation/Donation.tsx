@@ -3,10 +3,12 @@
 
 import React from 'react';
 import { manual } from '../../styles/font';
+import { useRouter } from 'next/navigation';
 
 const Donation = () => {
+  const router = useRouter();
   const handleDonate = () => {
-    console.log("Donation button clicked");
+    router.push('/donate');
   };
 
   return (
