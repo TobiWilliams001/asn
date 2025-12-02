@@ -356,8 +356,8 @@ const About = () => {
           height={36}
           className='w-6 h-6 md:w-9 md:h-9'
         />
-        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>African Students' Accelerator Program</h1>
-        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>African Students' Accelerator Program is designed to equip African students for global relevance and impact central to career development, entrepreneurship and leadership in any frontier of the continent and the world at large. The program seeks to build a viable network of change makers among African students across diverse universities, who are hungry for growth and development to aid their trajectory into their respective sphere of influence and for sustainable local and global impact.</p>
+        <h1 className='font-bold text-base sm:text-lg md:text-xl lg:text-2xl leading-tight my-2 md:my-4'>African Students&apos; Accelerator Program</h1>
+        <p className='text-[#777777] text-sm sm:text-base md:text-lg leading-relaxed'>African Students&apos; Accelerator Program is designed to equip African students for global relevance and impact central to career development, entrepreneurship and leadership in any frontier of the continent and the world at large. The program seeks to build a viable network of change makers among African students across diverse universities, who are hungry for growth and development to aid their trajectory into their respective sphere of influence and for sustainable local and global impact.</p>
       </div>
 
       <div className='w-full'>
