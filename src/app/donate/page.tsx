@@ -1,3 +1,4 @@
+"use client";
 import DonateHero from '@/components/Hero/DonateHero'
 import Footer from '../../components/Footer/Footer'
 import React from 'react'
