@@ -442,7 +442,7 @@ const About = () => {
         />
       </div>
       <p className='text-center font-bold text-xl md:text-3xl xl:text-5xl'>
-        {startCount ? <CountUp start={0} end={1500} duration={2.5} suffix="+" /> : '1500+'}
+        {startCount ? <CountUp start={0} end={5000} duration={2.5} suffix="+" /> : '5000+'}
       </p>
       <p className='text-center text-sm md:text-base xl:text-2xl'>Students reached</p>
     </div>
@@ -476,7 +476,7 @@ const About = () => {
         />
       </div>
       <p className='text-center font-bold text-xl md:text-3xl xl:text-5xl'>
-        {startCount ? <CountUp start={0} end={8} duration={2.7} suffix="+" /> : '8+'}
+        {startCount ? <CountUp start={0} end={50} duration={2.7} suffix="+" /> : '50+'}
       </p>
       <p className='text-center text-sm md:text-base xl:text-2xl'>Global Speakers</p>
     </div>
