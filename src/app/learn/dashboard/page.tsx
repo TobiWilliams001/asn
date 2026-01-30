@@ -30,7 +30,7 @@ export default function DashboardPage() {
             <span className="text-sm text-[#b89d9f]">{user.displayName}</span>
             <div 
               className="w-10 h-10 rounded-full bg-cover bg-center border-2 border-[#382929]"
-              style={{ backgroundImage: url() }}
+              style={{ backgroundImage: `url(${user.photoURL})` }}
             />
           </div>
         </div>
@@ -43,7 +43,6 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
-          {/* Stats Cards */}
           <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-6">
             <p className="text-xs text-[#b89d9f] uppercase font-bold mb-2">Modules Completed</p>
             <p className="text-4xl font-black">{modulesCompleted}/{modules.length}</p>
@@ -60,7 +59,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Enrollment Card */}
         {enrollment ? (
           <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-8 mb-6">
             <h3 className="text-2xl font-bold mb-4">ASAP Program</h3>
@@ -80,7 +78,7 @@ export default function DashboardPage() {
               <div className="w-full bg-[#382929] h-2 rounded-full">
                 <div 
                   className="bg-[#ea2a33] h-full rounded-full transition-all duration-500"
-                  style={{ width: ${enrollment.overallProgress}% }}
+                  style={{ width: `${enrollment.overallProgress}%` }}
                 />
               </div>
             </div>
@@ -104,7 +102,6 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Module Progress */}
         <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-8">
           <h3 className="text-xl font-bold mb-6">Your Modules</h3>
           <div className="space-y-4">
@@ -126,7 +123,7 @@ export default function DashboardPage() {
                   <div className="w-full bg-[#382929] h-1.5 rounded-full">
                     <div 
                       className="bg-[#ea2a33] h-full rounded-full"
-                      style={{ width: ${completionRate}% }}
+                      style={{ width: `${completionRate}%` }}
                     />
                   </div>
                 </div>
