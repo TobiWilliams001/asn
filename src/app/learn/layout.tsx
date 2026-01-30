@@ -1,6 +1,7 @@
 ﻿// src/app/learn/layout.tsx
 
 import Link from 'next/link';
+import { User } from 'lucide-react';
 
 export default function LearnLayout({
   children,
@@ -44,10 +45,23 @@ export default function LearnLayout({
               >
                 Resources
               </Link>
+              <Link 
+                href="/learn/profile" 
+                className="text-sm font-medium text-[#b89d9f] hover:text-white transition-colors flex items-center gap-1"
+              >
+                <User className="w-4 h-4" />
+                Profile
+              </Link>
             </nav>
           </div>
 
           <div className="flex items-center gap-4">
+            <Link
+              href="/learn/enroll"
+              className="text-sm font-medium px-4 py-2 bg-[#ea2a33] hover:bg-[#c41f27] text-white rounded-lg transition-colors"
+            >
+              Enroll
+            </Link>
             <Link
               href="/"
               className="text-sm font-medium text-[#b89d9f] hover:text-white transition-colors"
