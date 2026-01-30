@@ -17,12 +17,20 @@ export default function ASAPOverviewPage() {
               A transformative 12-week journey designed to bridge the gap between academic 
               excellence and professional mastery in the African corporate landscape.
             </p>
-            <Link 
-              href="/learn/asap/modules"
-              className="inline-block px-8 py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-lg font-bold rounded-lg transition-colors"
-            >
-              View Curriculum
-            </Link>
+            <div className="flex flex-wrap gap-4">
+              <Link 
+                href="/learn/enroll"
+                className="inline-block px-8 py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-lg font-bold rounded-lg transition-colors"
+              >
+                Enroll Now
+              </Link>
+              <Link 
+                href="/learn/asap/modules"
+                className="inline-block px-8 py-4 bg-[#382929] hover:bg-[#4a3636] text-white text-lg font-bold rounded-lg transition-colors"
+              >
+                View Curriculum
+              </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -59,14 +67,14 @@ export default function ASAPOverviewPage() {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {MOCK_MODULES.map((module, index) => {
-            const icons = ['', '', '', '', ''];
+            const icons = ['&#128506;', '&#127970;', '&#128161;', '&#128101;', '&#128203;'];
             return (
               <div 
                 key={module.id}
                 className="flex flex-col gap-3 rounded-xl border border-[#533c3d] bg-[#261c1c] p-6 transition-all hover:bg-[#2d2222]"
               >
                 <div className="flex items-center gap-3">
-                  <span className="text-3xl">{icons[index]}</span>
+                  <span className="text-3xl" dangerouslySetInnerHTML={{ __html: icons[index] }}></span>
                   <h3 className="text-white text-lg font-bold">{module.title}</h3>
                 </div>
                 <p className="text-[#b89d9f] text-sm">{module.description}</p>
@@ -91,28 +99,28 @@ export default function ASAPOverviewPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex gap-4 rounded-xl border border-[#533c3d] bg-[#261c1c] p-5 items-center">
             <div className="p-3 bg-[#181111] rounded-lg text-[#ea2a33]">
-              <span className="text-2xl"></span>
+              <span className="text-2xl">&#128196;</span>
             </div>
             <h3 className="text-white text-base font-bold leading-tight">Professional Resume</h3>
           </div>
           
           <div className="flex gap-4 rounded-xl border border-[#533c3d] bg-[#261c1c] p-5 items-center">
             <div className="p-3 bg-[#181111] rounded-lg text-[#ea2a33]">
-              <span className="text-2xl"></span>
+              <span className="text-2xl">&#129517;</span>
             </div>
             <h3 className="text-white text-base font-bold leading-tight">Personalized Career Map</h3>
           </div>
           
           <div className="flex gap-4 rounded-xl border border-[#533c3d] bg-[#261c1c] p-5 items-center">
             <div className="p-3 bg-[#181111] rounded-lg text-[#ea2a33]">
-              <span className="text-2xl"></span>
+              <span className="text-2xl">&#128300;</span>
             </div>
             <h3 className="text-white text-base font-bold leading-tight">Industry Research Paper</h3>
           </div>
           
           <div className="flex gap-4 rounded-xl border border-[#533c3d] bg-[#261c1c] p-5 items-center">
             <div className="p-3 bg-[#181111] rounded-lg text-[#ea2a33]">
-              <span className="text-2xl"></span>
+              <span className="text-2xl">&#128202;</span>
             </div>
             <h3 className="text-white text-base font-bold leading-tight">Corporate Awareness Exercise</h3>
           </div>
@@ -130,16 +138,16 @@ export default function ASAPOverviewPage() {
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link 
-              href="/learn/asap/modules"
+              href="/learn/enroll"
               className="px-10 py-4 bg-[#ea2a33] text-white font-bold rounded-lg hover:brightness-110 transition-all"
             >
-              View Curriculum
+              Enroll Now
             </Link>
             <Link 
-              href="/learn/dashboard"
+              href="/learn/asap/modules"
               className="px-10 py-4 bg-[#382929] text-white font-bold border border-white/10 hover:bg-[#4a3636] transition-all rounded-lg"
             >
-              Go to Dashboard
+              View Curriculum
             </Link>
           </div>
         </div>
