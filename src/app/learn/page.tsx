@@ -16,12 +16,20 @@ export default function LearnLandingPage() {
             Embark on a transformative 12-week journey designed to bridge the gap between 
             academic excellence and professional mastery in the African corporate landscape.
           </p>
-          <Link 
-            href="/learn/dashboard"
-            className="inline-block px-8 py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-lg font-bold rounded-lg transition-colors"
-          >
-            Get Started
-          </Link>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link 
+              href="/learn/enroll"
+              className="inline-block px-8 py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-lg font-bold rounded-lg transition-colors"
+            >
+              Enroll Now
+            </Link>
+            <Link 
+              href="/learn/asap"
+              className="inline-block px-8 py-4 bg-[#382929] hover:bg-[#4a3636] text-white text-lg font-bold rounded-lg transition-colors"
+            >
+              Learn More
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -81,10 +89,10 @@ export default function LearnLandingPage() {
             Join the next cohort and transform your career trajectory
           </p>
           <Link 
-            href="/learn/dashboard"
+            href="/learn/enroll"
             className="inline-block px-10 py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-lg font-bold rounded-lg transition-colors"
           >
-            Get Started Now
+            Enroll Now
           </Link>
         </div>
       </div>
