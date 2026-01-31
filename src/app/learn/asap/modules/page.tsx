@@ -14,14 +14,14 @@ export default function ModulesRoadmapPage() {
 
   // Calculate module completion
   const getModuleCompletion = (moduleId: string) => {
-    const module = modules.find(m => m.id === moduleId);
-    if (!module || module.lessons.length === 0) return 0;
+    const foundModule = modules.find(m => m.id === moduleId);
+    if (!foundModule || foundModule.lessons.length === 0) return 0;
     
     const completedLessons = progress.filter(
       p => p.moduleId === moduleId && p.completed
     ).length;
     
-    return Math.round((completedLessons / module.lessons.length) * 100);
+    return Math.round((completedLessons / foundModule.lessons.length) * 100);
   };
 
   // Check if module is unlocked
@@ -69,14 +69,14 @@ export default function ModulesRoadmapPage() {
 
         {/* Module Roadmap */}
         <div className="space-y-1">
-          {modules.map((module, index) => {
-            const completion = getModuleCompletion(module.id);
-            const isUnlocked = isModuleUnlocked(module.order);
+          {modules.map((courseModule, index) => {
+            const completion = getModuleCompletion(courseModule.id);
+            const isUnlocked = isModuleUnlocked(courseModule.order);
             const isCompleted = completion === 100;
-            const isCurrent = MOCK_ENROLLMENT.currentModuleId === module.id;
+            const isCurrent = MOCK_ENROLLMENT.currentModuleId === courseModule.id;
 
             return (
-              <div key={module.id} className="flex flex-col gap-1 pb-4">
+              <div key={courseModule.id} className="flex flex-col gap-1 pb-4">
                 <div className="flex items-start gap-3">
                   {/* Timeline dot */}
                   <div className="flex flex-col items-center">
@@ -111,17 +111,17 @@ export default function ModulesRoadmapPage() {
                         <p className={`text-xs font-bold uppercase tracking-wider mb-1 ${
                           isCurrent ? 'text-[#ea2a33]' : 'text-[#b89d9f]'
                         }`}>
-                          {module.weekRange}
+                          {courseModule.weekRange}
                         </p>
                         <h3 className={`text-xl font-bold mb-2 ${
                           isCurrent ? 'text-white' : 'text-white'
                         }`}>
-                          {module.title}
+                          {courseModule.title}
                         </h3>
-                        <p className="text-sm text-[#b89d9f]">{module.description}</p>
+                        <p className="text-sm text-[#b89d9f]">{courseModule.description}</p>
                       </div>
 
-                      {isUnlocked && module.lessons.length > 0 && (
+                      {isUnlocked && courseModule.lessons.length > 0 && (
                         <>
                           <div className="flex items-center justify-between text-sm mb-2">
                             <span className="text-[#b89d9f]">Progress</span>
@@ -134,7 +134,7 @@ export default function ModulesRoadmapPage() {
                             />
                           </div>
                           <Link
-                            href={`/learn/asap/modules/${module.id}`}
+                            href={`/learn/asap/modules/${courseModule.id}`}
                             className="inline-block px-5 py-2 bg-[#382929] hover:bg-[#4a3636] text-white text-sm font-bold rounded-lg transition-colors"
                           >
                             {completion > 0 ? 'Continue Module' : 'Start Module'}
