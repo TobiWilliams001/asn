@@ -47,7 +47,7 @@ export default function EnrollPage() {
             Join the <span className="text-[#ea2a33]">ASAP</span> Program
           </h1>
           <p className="text-xl text-[#b89d9f] max-w-2xl mx-auto">
-            Transform your career in 12 weeks with Africa's premier student accelerator
+            Transform your career in 12 weeks with Africa&apos;s premier student accelerator
           </p>
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function EnrollPage() {
 
             {/* What You Get */}
             <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-6">
-              <h3 className="text-lg font-bold mb-4">What You'll Get</h3>
+              <h3 className="text-lg font-bold mb-4">What You&apos;ll Get</h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0">
