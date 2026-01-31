@@ -215,7 +215,7 @@ export default function ResourceLabPage() {
             <div>
               <h4 className="font-bold mb-2">Want to contribute?</h4>
               <p className="text-sm text-[#b89d9f]">
-                Resource contribution features are coming soon. You'll be able to upload and share 
+                Resource contribution features are coming soon. You&apos;ll be able to upload and share 
                 your own materials with the ASN community.
               </p>
             </div>
