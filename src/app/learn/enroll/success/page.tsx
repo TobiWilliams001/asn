@@ -28,7 +28,7 @@ export default function EnrollmentSuccessPage() {
               <div>
                 <h3 className="font-bold mb-1">Check Your Email</h3>
                 <p className="text-sm text-[#b89d9f]">
-                  We've sent a confirmation email with program details and next steps.
+                  We&apos;ve sent a confirmation email with program details and next steps.
                 </p>
               </div>
             </div>
