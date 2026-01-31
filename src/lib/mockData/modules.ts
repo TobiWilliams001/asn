@@ -5,8 +5,8 @@ import { Module } from '@/types/learn';
 /**
  * Mock Modules Data
  * 
- * This data matches the structure from your Stitch UI.
- * We'll use this for frontend development, then swap to Firestore later.
+ * This data matches the structure from the Stitch UI.
+ * We'll use this for frontend development, then swap to Firestore later .
  */
 
 export const MOCK_MODULES: Module[] = [
