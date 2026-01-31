@@ -5,12 +5,8 @@ import Link from "next/link";
 import DonateButton from '../Button/DonateButton'
 
 const NavBar = () => {
-    const navTabs = [ "Home", "About", "Blog" ]
+    const navTabs = [ "Home", "About", "Learn", "Resources", "Blog" ]
     const [ openNav, setOpenNav ] = useState(false)
-    
-    // const handleClick = () => {
-    //     window.open('https://chat.whatsapp.com/HYCmYQr45EB4QM080Rrr6t', '_blank');
-    // };
 
     return (
         <nav className='relative'>
@@ -28,9 +24,15 @@ const NavBar = () => {
                 <div className="flex items-center">
                     <ul className='xl:flex md:gap-x-10 hidden mr-16'>
                         {navTabs?.map((tab)=> {
-                            if(tab==="Blog"){
+                            if(tab === "Blog" || tab === "Learn"){
                                 return (
                                     <Link key={tab} href={`/${tab?.toLowerCase()}`}>
+                                        <li className='font-semibold text-[16px] md:text-[20px] lg:text-[27px] text-[#EEB7BA]'>{tab}</li>
+                                    </Link>
+                                )
+                            } else if(tab === "Resources"){
+                                return (
+                                    <Link key={tab} href={`/learn/resources`}>
                                         <li className='font-semibold text-[16px] md:text-[20px] lg:text-[27px] text-[#EEB7BA]'>{tab}</li>
                                     </Link>
                                 )
@@ -77,12 +79,22 @@ const NavBar = () => {
                 </div>
                 <ul className='flex flex-col py-2'>
                     {navTabs?.map((tab) => {
-                        if(tab==="Blog"){
+                        if(tab === "Blog" || tab === "Learn"){
                             return (
                                 <Link 
                                     onClick={() => setOpenNav(false)} 
                                     key={tab} 
                                     href={`/${tab?.toLowerCase()}`}
+                                >
+                                    <li className='font-semibold text-[20px] text-[#CC2630] px-6 py-4 hover:bg-[#FDF5F5] transition-colors duration-200'>{tab}</li>
+                                </Link>
+                            )
+                        } else if(tab === "Resources"){
+                            return (
+                                <Link 
+                                    onClick={() => setOpenNav(false)} 
+                                    key={tab} 
+                                    href={`/learn/resources`}
                                 >
                                     <li className='font-semibold text-[20px] text-[#CC2630] px-6 py-4 hover:bg-[#FDF5F5] transition-colors duration-200'>{tab}</li>
                                 </Link>
