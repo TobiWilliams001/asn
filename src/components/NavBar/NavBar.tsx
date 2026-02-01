@@ -7,7 +7,7 @@ import DonateButton from '../Button/DonateButton'
 const NavBar = () => {
     const navTabs = [ "Home", "About", "Learn", "Resources", "Blog" ]
     const [ openNav, setOpenNav ] = useState(false)
-
+//
     return (
         <nav className='relative'>
             <div className='flex justify-between items-center w-full'>
