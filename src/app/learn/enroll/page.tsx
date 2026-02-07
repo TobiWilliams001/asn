@@ -1,13 +1,22 @@
-// src/app/learn/enroll/page.tsx
-
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuthContext } from '@/context/AuthContext';
 
 export default function EnrollPage() {
+  return (
+    <ProtectedRoute>
+      <EnrollContent />
+    </ProtectedRoute>
+  );
+}
+
+function EnrollContent() {
   const router = useRouter();
+  const { user, userProfile } = useAuthContext();
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -16,6 +25,17 @@ export default function EnrollPage() {
     program: 'asap'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (user || userProfile) {
+      setFormData(prev => ({
+        ...prev,
+        fullName: userProfile?.fullName || user?.displayName || prev.fullName,
+        email: userProfile?.email || user?.email || prev.email,
+        university: userProfile?.institution || prev.university,
+      }));
+    }
+  }, [user, userProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,55 +54,51 @@ export default function EnrollPage() {
 
   return (
     <div className="min-h-screen bg-[#181111] text-white">
-      {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-[#2d1f1f] via-[#261c1c] to-[#181111] border-b border-[#382929]">
-        <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-          <Link 
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16 text-center">
+          <Link
             href="/learn"
-            className="inline-flex items-center text-[#b89d9f] hover:text-white mb-6 text-sm"
+            className="inline-flex items-center text-[#b89d9f] hover:text-white mb-4 sm:mb-6 text-sm"
           >
             &larr; Back to Learning Platform
           </Link>
-          <h1 className="text-4xl md:text-5xl font-black mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3 sm:mb-4">
             Join the <span className="text-[#ea2a33]">ASAP</span> Program
           </h1>
-          <p className="text-xl text-[#b89d9f] max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-[#b89d9f] max-w-2xl mx-auto">
             Transform your career in 12 weeks with Africa&apos;s premier student accelerator
           </p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-10">
-          
-          {/* Left Column - Benefits */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 sm:gap-10">
+
           <div className="lg:col-span-2 space-y-6">
-            {/* Cohort Info */}
-            <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-6">
+            <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-5 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
                 <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                 <span className="text-green-400 font-bold text-sm">ENROLLING NOW</span>
               </div>
-              <h3 className="text-xl font-bold mb-2">Cohort 2025</h3>
+              <h3 className="text-lg sm:text-xl font-bold mb-2">Cohort 2025</h3>
               <p className="text-[#b89d9f] text-sm mb-4">Next cohort starts February 2025</p>
               <div className="space-y-2 text-sm">
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-[#b89d9f]">Duration</span>
                   <span className="font-bold">12 Weeks</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-[#b89d9f]">Modules</span>
                   <span className="font-bold">5 Core</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between gap-2">
                   <span className="text-[#b89d9f]">Format</span>
                   <span className="font-bold">Online</span>
                 </div>
               </div>
             </div>
 
-            {/* What You Get */}
-            <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-6">
+            <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-5 sm:p-6">
               <h3 className="text-lg font-bold mb-4">What You&apos;ll Get</h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
@@ -125,12 +141,11 @@ export default function EnrollPage() {
             </div>
           </div>
 
-          {/* Right Column - Form */}
           <div className="lg:col-span-3">
-            <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-8">
-              <h2 className="text-2xl font-bold mb-2">Enrollment Form</h2>
+            <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-5 sm:p-8">
+              <h2 className="text-xl sm:text-2xl font-bold mb-2">Enrollment Form</h2>
               <p className="text-[#b89d9f] text-sm mb-6">Fill in your details to secure your spot</p>
-              
+
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label htmlFor="fullName" className="block text-sm font-bold mb-2">
@@ -143,7 +158,7 @@ export default function EnrollPage() {
                     required
                     value={formData.fullName}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                     placeholder="Enter your full name"
                   />
                 </div>
@@ -159,7 +174,7 @@ export default function EnrollPage() {
                     required
                     value={formData.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                     placeholder="your.email@example.com"
                   />
                 </div>
@@ -175,7 +190,7 @@ export default function EnrollPage() {
                     required
                     value={formData.university}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                     placeholder="Enter your university name"
                   />
                 </div>
@@ -190,7 +205,7 @@ export default function EnrollPage() {
                     required
                     value={formData.yearOfStudy}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#181111] border border-[#382929] rounded-lg text-white focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                   >
                     <option value="">Select your year</option>
                     <option value="1">1st Year</option>
@@ -212,7 +227,7 @@ export default function EnrollPage() {
                     required
                     value={formData.program}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-[#181111] border border-[#382929] rounded-lg text-white focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                   >
                     <option value="asap">African Student Accelerator Program (ASAP)</option>
                   </select>
@@ -225,8 +240,8 @@ export default function EnrollPage() {
                     required
                     className="mt-1 w-4 h-4 accent-[#ea2a33]"
                   />
-                  <label htmlFor="terms" className="text-sm text-[#b89d9f]">
-                    I agree to the ASN Learning Platform terms and commit to actively 
+                  <label htmlFor="terms" className="text-xs sm:text-sm text-[#b89d9f]">
+                    I agree to the ASN Learning Platform terms and commit to actively
                     participating in the 12-week program.
                   </label>
                 </div>
@@ -235,7 +250,7 @@ export default function EnrollPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-full px-8 py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-lg font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-8 py-3 sm:py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-base sm:text-lg font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center gap-2">
