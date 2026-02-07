@@ -10,6 +10,7 @@ const nextConfig = {
           }
         ]
     },
+    transpilePackages: ['undici'],
     webpack: (config) => {
         config.resolve.alias.canvas = false;
         return config;
