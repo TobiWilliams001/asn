@@ -1,20 +1,24 @@
-import Image from 'next/image'
-import React from 'react'
-import Herobody from '../Herobody/Herobody'
-import NavBar from '../NavBar/NavBar'
+import Image from 'next/image';
+import NavBar from '../NavBar/NavBar';
+import Herobody from '../Herobody/Herobody';
 
-const Hero = () => {
+export default function Hero() {
   return (
-    <div className="relative h-screen bg-[#402527] w-full phone:h-screen" id="home" >
-        <Image src={`./../asn_bg.svg`} fill={true} style={{objectFit: "cover", mixBlendMode: 'multiply',}} alt="Bgimage" className="z-[0]" priority={true} />
-        <div className='relative w-full phone:h-screen' >
-            <div className=" lg:px-20 lg:py-12 md:p-10 p-6 w-full phone:h-screen" >
-                <NavBar />
-                <Herobody />
-            </div>
+    <div className="relative min-h-screen bg-[#402527] w-full" id="home">
+      <Image
+        src="/asn_bg.svg"
+        fill={true}
+        style={{ objectFit: 'cover', mixBlendMode: 'multiply' }}
+        alt="Background"
+        className="z-0"
+        priority
+      />
+      <div className="relative w-full min-h-screen flex flex-col">
+        <div className="px-6 md:px-10 xl:px-20 pt-4 md:pt-6 xl:pt-12">
+          <NavBar />
         </div>
+        <Herobody />
+      </div>
     </div>
-  )
+  );
 }
-
-export default Hero
