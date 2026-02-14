@@ -22,13 +22,14 @@ function EnrollContent() {
     email: '',
     university: '',
     yearOfStudy: '',
-    program: 'asap'
+    program: 'asap',
   });
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (user || userProfile) {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
         fullName: userProfile?.fullName || user?.displayName || prev.fullName,
         email: userProfile?.email || user?.email || prev.email,
@@ -40,7 +41,7 @@ function EnrollContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     console.log('Enrollment data:', formData);
     router.push('/learn/enroll/success');
   };
@@ -48,17 +49,19 @@ function EnrollContent() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
   return (
     <div className="min-h-screen bg-[#181111] text-white">
+      {/* Hero Header */}
       <div className="relative bg-gradient-to-br from-[#2d1f1f] via-[#261c1c] to-[#181111] border-b border-[#382929]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-10 sm:py-16 text-center">
           <Link
             href="/learn"
-            className="inline-flex items-center text-[#b89d9f] hover:text-white mb-4 sm:mb-6 text-sm"
+            className="inline-flex items-center text-[#b89d9f] hover:text-white mb-4 sm:mb-6 text-sm transition-colors"
+            data-testid="link-back-to-learn"
           >
             &larr; Back to Learning Platform
           </Link>
@@ -71,13 +74,16 @@ function EnrollContent() {
         </div>
       </div>
 
+      {/* Main Content */}
       <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 sm:gap-10">
 
+          {/* Left Sidebar - Program Info */}
           <div className="lg:col-span-2 space-y-6">
+            {/* Cohort Status Card */}
             <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-5 sm:p-6">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
                 <span className="text-green-400 font-bold text-sm">ENROLLING NOW</span>
               </div>
               <h3 className="text-lg sm:text-xl font-bold mb-2">Cohort 2025</h3>
@@ -95,15 +101,20 @@ function EnrollContent() {
                   <span className="text-[#b89d9f]">Format</span>
                   <span className="font-bold">Online</span>
                 </div>
+                <div className="flex justify-between gap-2">
+                  <span className="text-[#b89d9f]">Cost</span>
+                  <span className="font-bold text-green-400">Free</span>
+                </div>
               </div>
             </div>
 
+            {/* What You'll Get Card */}
             <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-5 sm:p-6">
               <h3 className="text-lg font-bold mb-4">What You&apos;ll Get</h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#ea2a33]">&#9654;</span>
+                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[#ea2a33] text-sm font-bold">1</span>
                   </div>
                   <div>
                     <p className="font-bold text-sm">Video Lessons</p>
@@ -111,8 +122,8 @@ function EnrollContent() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#ea2a33]">&#128196;</span>
+                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[#ea2a33] text-sm font-bold">2</span>
                   </div>
                   <div>
                     <p className="font-bold text-sm">Resource Library</p>
@@ -120,8 +131,8 @@ function EnrollContent() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#ea2a33]">&#127942;</span>
+                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[#ea2a33] text-sm font-bold">3</span>
                   </div>
                   <div>
                     <p className="font-bold text-sm">Portfolio Deliverables</p>
@@ -129,8 +140,8 @@ function EnrollContent() {
                   </div>
                 </li>
                 <li className="flex items-start gap-3">
-                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <span className="text-[#ea2a33]">&#128101;</span>
+                  <div className="w-8 h-8 bg-[#ea2a33]/20 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <span className="text-[#ea2a33] text-sm font-bold">4</span>
                   </div>
                   <div>
                     <p className="font-bold text-sm">Community Access</p>
@@ -141,6 +152,7 @@ function EnrollContent() {
             </div>
           </div>
 
+          {/* Right Column - Enrollment Form */}
           <div className="lg:col-span-3">
             <div className="bg-[#261c1c] border border-[#382929] rounded-xl p-5 sm:p-8">
               <h2 className="text-xl sm:text-2xl font-bold mb-2">Enrollment Form</h2>
@@ -160,6 +172,7 @@ function EnrollContent() {
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                     placeholder="Enter your full name"
+                    data-testid="input-enroll-fullname"
                   />
                 </div>
 
@@ -176,6 +189,7 @@ function EnrollContent() {
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                     placeholder="your.email@example.com"
+                    data-testid="input-enroll-email"
                   />
                 </div>
 
@@ -192,6 +206,7 @@ function EnrollContent() {
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white placeholder-[#b89d9f] text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
                     placeholder="Enter your university name"
+                    data-testid="input-enroll-university"
                   />
                 </div>
 
@@ -206,6 +221,7 @@ function EnrollContent() {
                     value={formData.yearOfStudy}
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    data-testid="select-enroll-year"
                   >
                     <option value="">Select your year</option>
                     <option value="1">1st Year</option>
@@ -228,17 +244,22 @@ function EnrollContent() {
                     value={formData.program}
                     onChange={handleChange}
                     className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-[#181111] border border-[#382929] rounded-lg text-white text-sm sm:text-base focus:outline-none focus:border-[#ea2a33] transition-colors"
+                    data-testid="select-enroll-program"
                   >
                     <option value="asap">African Student Accelerator Program (ASAP)</option>
                   </select>
                 </div>
 
+                {/* Terms Checkbox */}
                 <div className="flex items-start gap-3 pt-2">
                   <input
                     type="checkbox"
                     id="terms"
                     required
+                    checked={agreedToTerms}
+                    onChange={(e) => setAgreedToTerms(e.target.checked)}
                     className="mt-1 w-4 h-4 accent-[#ea2a33]"
+                    data-testid="checkbox-enroll-terms"
                   />
                   <label htmlFor="terms" className="text-xs sm:text-sm text-[#b89d9f]">
                     I agree to the ASN Learning Platform terms and commit to actively
@@ -246,15 +267,17 @@ function EnrollContent() {
                   </label>
                 </div>
 
+                {/* Submit Button */}
                 <div className="pt-4">
                   <button
                     type="submit"
                     disabled={isSubmitting}
                     className="w-full px-8 py-3 sm:py-4 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-base sm:text-lg font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    data-testid="button-enroll-submit"
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center gap-2">
-                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                        <span className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                         Processing...
                       </span>
                     ) : (
@@ -265,7 +288,10 @@ function EnrollContent() {
               </form>
 
               <p className="text-center text-xs text-[#b89d9f] mt-6">
-                Questions? Email <a href="mailto:info@asnafrica.org" className="text-[#ea2a33] hover:underline">info@asnafrica.org</a>
+                Questions? Email{' '}
+                <a href="mailto:info@asnafrica.org" className="text-[#ea2a33] hover:underline">
+                  info@asnafrica.org
+                </a>
               </p>
             </div>
           </div>
