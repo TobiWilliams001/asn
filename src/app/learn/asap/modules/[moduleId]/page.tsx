@@ -1,328 +1,315 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { MOCK_MODULES } from '@/lib/mockData/modules';
-import { MOCK_PROGRESS } from '@/lib/mockData/user';
-import { Module, Lesson, Progress } from '@/types/learn';
+import { useState } from 'react';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { Menu, X } from 'lucide-react';
 
-export default function ModuleViewerPage() {
-  return (
-    <ProtectedRoute>
-      <ModuleViewerContent />
-    </ProtectedRoute>
-  );
-}
+const MODULE_CONTENT: Record<
+  number,
+  {
+    title: string;
+    weekRange: string;
+    description: string;
+    lessons: { id: number; title: string; duration: string; type: string; completed: boolean }[];
+  }
+> = {
+  1: {
+    title: 'Career Mapping & Personal Branding',
+    weekRange: 'Weeks 1-2',
+    description:
+      'Build clarity around your professional identity and craft a personal brand that opens doors globally.',
+    lessons: [
+      { id: 1, title: 'Understanding Your Strengths', duration: '25 min', type: 'video', completed: true },
+      { id: 2, title: 'Career Trajectory Planning', duration: '30 min', type: 'reading', completed: true },
+      { id: 3, title: 'Building Your Personal Brand', duration: '20 min', type: 'video', completed: true },
+      { id: 4, title: 'LinkedIn Optimization Workshop', duration: '35 min', type: 'interactive', completed: true },
+      { id: 5, title: 'Portfolio Development Guide', duration: '40 min', type: 'reading', completed: true },
+    ],
+  },
+  2: {
+    title: 'Corporate Awareness & Professional Etiquette',
+    weekRange: 'Weeks 3-4',
+    description:
+      'Master the unwritten rules of corporate environments and professional communication.',
+    lessons: [
+      { id: 1, title: 'Corporate Culture 101', duration: '20 min', type: 'video', completed: true },
+      { id: 2, title: 'Business Communication Mastery', duration: '30 min', type: 'reading', completed: true },
+      { id: 3, title: 'Professional Networking Strategies', duration: '25 min', type: 'video', completed: true },
+      { id: 4, title: 'Email & Meeting Etiquette', duration: '15 min', type: 'interactive', completed: false },
+    ],
+  },
+  3: {
+    title: 'Design Thinking & Problem Solving',
+    weekRange: 'Weeks 5-7',
+    description:
+      'Apply human-centered design methodologies to create innovative solutions for real problems.',
+    lessons: [
+      { id: 1, title: 'Introduction to Design Thinking', duration: '30 min', type: 'video', completed: false },
+      { id: 2, title: 'Empathy Mapping Workshop', duration: '35 min', type: 'interactive', completed: false },
+      { id: 3, title: 'Ideation Techniques', duration: '25 min', type: 'reading', completed: false },
+      { id: 4, title: 'Prototyping & Testing', duration: '40 min', type: 'video', completed: false },
+    ],
+  },
+  4: {
+    title: 'Leadership & Influence',
+    weekRange: 'Weeks 8-10',
+    description:
+      'Develop the mindset, skills, and emotional intelligence to lead with authenticity and impact.',
+    lessons: [
+      { id: 1, title: 'Authentic Leadership', duration: '25 min', type: 'video', completed: false },
+      { id: 2, title: 'Emotional Intelligence Essentials', duration: '30 min', type: 'reading', completed: false },
+      { id: 3, title: 'Team Building & Delegation', duration: '20 min', type: 'interactive', completed: false },
+      { id: 4, title: 'Conflict Resolution & Negotiation', duration: '25 min', type: 'video', completed: false },
+    ],
+  },
+  5: {
+    title: 'Action Planning & Execution',
+    weekRange: 'Weeks 11-12',
+    description:
+      'Turn your vision into reality with structured planning, accountability, and execution strategies.',
+    lessons: [
+      { id: 1, title: 'Setting OKRs', duration: '20 min', type: 'video', completed: false },
+      { id: 2, title: 'Building Your Action Plan', duration: '35 min', type: 'interactive', completed: false },
+      { id: 3, title: 'Accountability Systems', duration: '15 min', type: 'reading', completed: false },
+      { id: 4, title: 'Final Pitch Preparation & Delivery', duration: '40 min', type: 'interactive', completed: false },
+    ],
+  },
+};
 
-function ModuleViewerContent() {
+const TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
+  video: { icon: '▶', color: 'text-blue-400 bg-blue-500/15' },
+  reading: { icon: '☰', color: 'text-amber-400 bg-amber-500/15' },
+  interactive: { icon: '⚡', color: 'text-purple-400 bg-purple-500/15' },
+};
+
+function ModuleContent() {
   const params = useParams();
-  const moduleId = params.moduleId as string;
+  const router = useRouter();
+  const moduleId = Number(params.moduleId);
+  const mod = MODULE_CONTENT[moduleId];
+  const [activeLesson, setActiveLesson] = useState<number | null>(null);
 
-  const [module, setModule] = useState<Module | null>(null);
-  const [progress, setProgress] = useState<Progress[]>(MOCK_PROGRESS);
-  const [activeLesson, setActiveLesson] = useState<Lesson | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  useEffect(() => {
-    const foundModule = MOCK_MODULES.find(m => m.id === moduleId);
-    if (foundModule) {
-      setModule(foundModule);
-      if (foundModule.lessons.length > 0) {
-        setActiveLesson(foundModule.lessons[0]);
-      }
-    }
-  }, [moduleId]);
-
-  if (!module) {
+  if (!mod) {
     return (
-      <div className="min-h-screen bg-[#181111] text-white flex items-center justify-center">
-        <div className="text-center px-4">
-          <h1 className="text-2xl font-bold mb-4">Module Not Found</h1>
-          <Link href="/learn/asap/modules" className="text-[#ea2a33] hover:underline">
-            Back to Modules
-          </Link>
+      <div className="min-h-screen text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Module Not Found</h2>
+          <p className="text-[#b89d9f] mb-6">
+            This module doesn&apos;t exist or hasn&apos;t been created yet.
+          </p>
+          <button
+            onClick={() => router.push('/learn/dashboard')}
+            className="text-[#ea2a33] font-semibold hover:text-white transition-colors"
+          >
+            Back to Dashboard
+          </button>
         </div>
       </div>
     );
   }
 
-  const isLessonCompleted = (lessonId: string) => {
-    return progress.some(p =>
-      p.moduleId === moduleId &&
-      p.lessonId === lessonId &&
-      p.completed
-    );
-  };
-
-  const moduleCompletion = module.lessons.length > 0
-    ? Math.round((progress.filter(p => p.moduleId === moduleId && p.completed).length / module.lessons.length) * 100)
-    : 0;
-
-  const handleMarkComplete = () => {
-    if (!activeLesson) return;
-    const existingIndex = progress.findIndex(
-      p => p.moduleId === moduleId && p.lessonId === activeLesson.id
-    );
-    if (existingIndex === -1) {
-      setProgress([...progress, {
-        userId: 'mock-user-kwame-123',
-        moduleId,
-        lessonId: activeLesson.id,
-        completed: true,
-        completedAt: new Date(),
-        lastAccessedAt: new Date()
-      }]);
-      alert('Lesson marked as complete!');
-    } else {
-      alert('Lesson already completed!');
-    }
-  };
-
-  const handleSelectLesson = (lesson: Lesson) => {
-    setActiveLesson(lesson);
-    setSidebarOpen(false);
-  };
+  const completedCount = mod.lessons.filter((l) => l.completed).length;
+  const progress = Math.round((completedCount / mod.lessons.length) * 100);
+  const selectedLesson = mod.lessons.find((l) => l.id === activeLesson);
 
   return (
-    <div className="min-h-screen bg-[#181111] text-white flex flex-col lg:flex-row">
-      {/* Mobile Header with Menu Toggle */}
-      <div className="lg:hidden flex items-center justify-between p-4 border-b border-[#382929]">
-        <Link
-          href="/learn/asap/modules"
-          className="text-[#b89d9f] hover:text-white text-sm"
-        >
-          &larr; All Modules
-        </Link>
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 text-[#b89d9f] hover:text-white"
-          data-testid="button-toggle-lesson-sidebar"
-        >
-          {sidebarOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+    <div className="min-h-screen text-white">
+      {/* Module Header */}
+      <div className="bg-gradient-to-b from-[#261c1c] to-[#181111] border-b border-white/[0.06]">
+        <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
+          <Link
+            href="/learn/dashboard"
+            className="inline-flex items-center gap-1 text-[#b89d9f] hover:text-white text-sm transition-colors mb-4"
+          >
+            <span>&#8592;</span> Back to Dashboard
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#ea2a33] bg-[#ea2a33]/10 px-3 py-1 rounded-full">
+                  Module {moduleId}
+                </span>
+                <span className="text-xs text-[#b89d9f]">{mod.weekRange}</span>
+              </div>
+              <h1 className="text-2xl md:text-3xl font-bold mb-1">{mod.title}</h1>
+              <p className="text-[#b89d9f] text-sm max-w-xl">{mod.description}</p>
+            </div>
+            <div className="flex items-center gap-3 flex-shrink-0">
+              <div className="text-right">
+                <p className="text-sm font-bold">
+                  {completedCount}/{mod.lessons.length} lessons
+                </p>
+                <p className="text-xs text-[#b89d9f]">{progress}% complete</p>
+              </div>
+              <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
+                <svg className="w-6 h-6" viewBox="0 0 36 36">
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="rgba(255,255,255,0.06)"
+                    strokeWidth="3"
+                  />
+                  <path
+                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none"
+                    stroke="#ea2a33"
+                    strokeWidth="3"
+                    strokeDasharray={`${progress}, 100`}
+                    strokeLinecap="round"
+                  />
+                </svg>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Mobile Sidebar Overlay */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/60 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      {/* Sidebar */}
-      <aside className={`
-        fixed top-0 left-0 h-full w-80 z-50 bg-[#181111] border-r border-[#382929] flex flex-col overflow-y-auto
-        transform transition-transform duration-300 ease-in-out
-        lg:static lg:transform-none lg:z-auto
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-      `}>
-        <div className="p-4 sm:p-6">
-          {/* Close button on mobile */}
-          <div className="flex items-center justify-between lg:hidden mb-4">
-            <span className="text-sm font-bold text-white">Lessons</span>
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="p-1 text-[#b89d9f] hover:text-white"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-
-          <Link
-            href="/learn/asap/modules"
-            className="hidden lg:inline-flex items-center text-[#b89d9f] hover:text-white mb-6 text-sm"
-          >
-            &larr; All Modules
-          </Link>
-
-          <h3 className="text-xs font-bold uppercase tracking-widest text-[#b89d9f] mb-6">
-            {module.weekRange}
-          </h3>
-
-          <div className="mb-6 pb-6 border-b border-[#382929]">
-            <div className="flex justify-between text-sm mb-2">
-              <span className="text-[#b89d9f]">Module Progress</span>
-              <span className="font-bold text-[#ea2a33]">{moduleCompletion}%</span>
-            </div>
-            <div className="w-full bg-[#382929] h-2 rounded-full">
-              <div
-                className="bg-[#ea2a33] h-full rounded-full transition-all"
-                style={{ width: `${moduleCompletion}%` }}
-              />
-            </div>
-          </div>
-
-          <h4 className="text-xs font-bold uppercase tracking-widest text-[#b89d9f] mb-4">
-            Lessons
-          </h4>
-          <div className="space-y-2">
-            {module.lessons.map((lesson, index) => {
-              const isCompleted = isLessonCompleted(lesson.id);
-              const isActive = activeLesson?.id === lesson.id;
-
-              return (
-                <button
-                  key={lesson.id}
-                  onClick={() => handleSelectLesson(lesson)}
-                  className={`w-full text-left p-3 rounded-lg transition-all ${
-                    isActive
-                      ? 'bg-[#382929] border-l-4 border-[#ea2a33]'
-                      : 'hover:bg-[#261c1c]'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className={`size-6 flex-shrink-0 rounded-full flex items-center justify-center ${
-                      isCompleted
-                        ? 'bg-[#ea2a33]'
-                        : 'border-2 border-[#382929]'
-                    }`}>
-                      {isCompleted ? (
-                        <span className="text-white text-xs">&check;</span>
-                      ) : (
-                        <span className="text-[#b89d9f] text-xs">{index + 1}</span>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className={`text-sm font-medium truncate ${
-                        isActive ? 'text-white' : 'text-[#b89d9f]'
-                      }`}>
-                        {lesson.title}
-                      </p>
-                      <p className="text-xs text-[#b89d9f]">{lesson.duration} min</p>
-                    </div>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 overflow-y-auto">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-10 py-6 sm:py-10">
-          {activeLesson ? (
-            <>
-              <div className="mb-6 sm:mb-8">
-                <div className="flex items-center gap-2 text-[#ea2a33] font-bold text-xs sm:text-sm mb-2">
-                  <span>MODULE {module.order}: {module.weekRange.toUpperCase()}</span>
-                </div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black mb-2 sm:mb-3">{module.title}</h1>
-                <h2 className="text-lg sm:text-2xl text-[#b89d9f] mb-2">{activeLesson.title}</h2>
-                <p className="text-sm sm:text-base text-[#b89d9f]">{activeLesson.description}</p>
-              </div>
-
-              <div className="mb-6 sm:mb-8">
-                <h3 className="text-lg sm:text-xl font-bold mb-4 flex items-center gap-2">
-                  <span className="text-[#ea2a33]">&#9654;</span>
-                  Video Lesson
-                </h3>
-                <div className="aspect-video rounded-xl overflow-hidden border border-[#382929] bg-black mb-3">
-                  <iframe
-                    src={activeLesson.videoUrl}
-                    className="w-full h-full"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
-                </div>
-                <div className="flex justify-between text-xs sm:text-sm text-[#b89d9f]">
-                  <span>Duration: {activeLesson.duration} minutes</span>
-                  <span>Core Concept</span>
-                </div>
-              </div>
-
-              {activeLesson.content && (
-                <div className="mb-6 sm:mb-8">
-                  <h3 className="text-lg sm:text-xl font-bold mb-4">Lesson Overview</h3>
-                  <div
-                    className="prose prose-invert max-w-none text-[#b89d9f] text-sm sm:text-base"
-                    dangerouslySetInnerHTML={{ __html: activeLesson.content }}
-                  />
-                </div>
-              )}
-
-              {activeLesson.resources && activeLesson.resources.length > 0 && (
-                <div className="mb-6 sm:mb-8">
-                  <h3 className="text-lg sm:text-xl font-bold mb-4">Reading Materials</h3>
-                  <div className="space-y-3">
-                    {activeLesson.resources.map((resource, index) => (
-                      <a
-                        key={index}
-                        href={resource.fileUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl border border-[#382929] bg-[#261c1c] hover:bg-[#2d2222] transition-all"
-                      >
-                        <div className="p-2 bg-[#181111] rounded-lg text-[#ea2a33]">
-                          <span className="text-xl sm:text-2xl">&#128196;</span>
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-bold truncate">{resource.title}</h4>
-                          <p className="text-[10px] text-[#b89d9f] uppercase font-bold tracking-wider">
-                            {resource.type.toUpperCase()} {resource.pages ? `- ${resource.pages} Pages` : ''}
-                          </p>
-                        </div>
-                        <span className="text-[#b89d9f] flex-shrink-0">&darr;</span>
-                      </a>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation Buttons */}
-              <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 pt-6 border-t border-[#382929]">
-                <button
-                  onClick={() => {
-                    const currentIndex = module.lessons.findIndex(l => l.id === activeLesson.id);
-                    if (currentIndex > 0) {
-                      setActiveLesson(module.lessons[currentIndex - 1]);
-                    }
-                  }}
-                  className="px-4 sm:px-6 py-3 bg-[#382929] hover:bg-[#4a3636] text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={module.lessons.findIndex(l => l.id === activeLesson.id) === 0}
-                >
-                  &larr; Previous
-                </button>
-
-                {isLessonCompleted(activeLesson.id) ? (
-                  <div className="flex items-center justify-center gap-2 px-4 sm:px-6 py-3 bg-green-900/30 text-green-400 text-sm font-bold rounded-lg">
-                    <span>&check;</span>
-                    <span>Completed</span>
-                  </div>
-                ) : (
+      {/* Content Area */}
+      <div className="max-w-6xl mx-auto px-6 py-8 md:py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Lesson Sidebar */}
+          <div className="lg:col-span-4 xl:col-span-3">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-4">
+              Lessons
+            </h3>
+            <div className="space-y-2">
+              {mod.lessons.map((lesson) => {
+                const typeStyle = TYPE_CONFIG[lesson.type] || {
+                  icon: '●',
+                  color: 'text-white bg-white/10',
+                };
+                return (
                   <button
-                    onClick={handleMarkComplete}
-                    className="px-4 sm:px-6 py-3 bg-[#ea2a33] hover:bg-[#c41f27] text-white text-sm font-bold rounded-lg transition-colors"
+                    key={lesson.id}
+                    onClick={() => setActiveLesson(lesson.id)}
+                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
+                      activeLesson === lesson.id
+                        ? 'bg-[#ea2a33]/10 border border-[#ea2a33]/20'
+                        : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.1] hover:bg-white/[0.05]'
+                    }`}
                   >
-                    &check; Mark Complete
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 mt-0.5 ${
+                          lesson.completed ? 'bg-green-500/15 text-green-400' : typeStyle.color
+                        }`}
+                      >
+                        {lesson.completed ? '✓' : typeStyle.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p
+                          className={`font-semibold text-sm leading-snug ${
+                            lesson.completed ? 'text-[#b89d9f]' : 'text-white'
+                          }`}
+                        >
+                          {lesson.title}
+                        </p>
+                        <p className="text-xs text-[#b89d9f] mt-1">
+                          {lesson.duration} &middot; {lesson.type}
+                        </p>
+                      </div>
+                    </div>
                   </button>
-                )}
-
-                <button
-                  onClick={() => {
-                    const currentIndex = module.lessons.findIndex(l => l.id === activeLesson.id);
-                    if (currentIndex < module.lessons.length - 1) {
-                      setActiveLesson(module.lessons[currentIndex + 1]);
-                    }
-                  }}
-                  className="px-4 sm:px-6 py-3 bg-[#382929] hover:bg-[#4a3636] text-white text-sm font-bold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  disabled={module.lessons.findIndex(l => l.id === activeLesson.id) === module.lessons.length - 1}
-                >
-                  Next &rarr;
-                </button>
-              </div>
-            </>
-          ) : (
-            <div className="text-center py-20">
-              <p className="text-[#b89d9f]">No lessons available in this module yet.</p>
+                );
+              })}
             </div>
-          )}
+          </div>
+
+          {/* Content Viewer */}
+          <div className="lg:col-span-8 xl:col-span-9">
+            {selectedLesson ? (
+              <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl overflow-hidden">
+                {/* Lesson Header */}
+                <div className="p-6 md:p-8 border-b border-white/[0.06]">
+                  <div className="flex items-center gap-3 mb-2">
+                    <span
+                      className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs ${
+                        TYPE_CONFIG[selectedLesson.type]?.color || 'bg-white/10'
+                      }`}
+                    >
+                      {TYPE_CONFIG[selectedLesson.type]?.icon || '●'}
+                    </span>
+                    <span className="text-xs text-[#b89d9f] uppercase tracking-wider font-medium">
+                      {selectedLesson.type} &middot; {selectedLesson.duration}
+                    </span>
+                    {selectedLesson.completed && (
+                      <span className="text-xs font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">
+                        Completed
+                      </span>
+                    )}
+                  </div>
+                  <h2 className="text-xl md:text-2xl font-bold">{selectedLesson.title}</h2>
+                </div>
+
+                {/* Content Placeholder */}
+                <div className="p-8 md:p-12">
+                  <div className="bg-white/[0.03] rounded-xl p-10 text-center border border-dashed border-white/[0.06]">
+                    <div className="w-16 h-16 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">
+                        {TYPE_CONFIG[selectedLesson.type]?.icon || '●'}
+                      </span>
+                    </div>
+                    <p className="text-[#b89d9f] mb-2">
+                      Lesson content will appear here when the full curriculum is loaded.
+                    </p>
+                    <p className="text-[#b89d9f]/60 text-sm">
+                      This is a placeholder for {selectedLesson.type} content.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Lesson Navigation */}
+                <div className="p-6 border-t border-white/[0.06] flex items-center justify-between">
+                  <button
+                    onClick={() => {
+                      const prevId = selectedLesson.id - 1;
+                      if (prevId >= 1) setActiveLesson(prevId);
+                    }}
+                    disabled={selectedLesson.id === 1}
+                    className="text-sm text-[#b89d9f] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    &#8592; Previous Lesson
+                  </button>
+                  {!selectedLesson.completed && (
+                    <button className="bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white px-6 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all">
+                      Mark Complete
+                    </button>
+                  )}
+                  <button
+                    onClick={() => {
+                      const nextId = selectedLesson.id + 1;
+                      if (nextId <= mod.lessons.length) setActiveLesson(nextId);
+                    }}
+                    disabled={selectedLesson.id === mod.lessons.length}
+                    className="text-sm text-[#b89d9f] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                  >
+                    Next Lesson &#8594;
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-12 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
+                  <span className="text-2xl text-[#b89d9f]">&#9654;</span>
+                </div>
+                <p className="text-[#b89d9f] text-lg mb-1">Select a lesson to begin</p>
+                <p className="text-[#b89d9f]/60 text-sm">
+                  Choose from the lesson list on the left to start learning
+                </p>
+              </div>
+            )}
+          </div>
         </div>
-      </main>
+      </div>
     </div>
+  );
+}
+
+export default function ModulePage() {
+  return (
+    <ProtectedRoute>
+      <ModuleContent />
+    </ProtectedRoute>
   );
 }
