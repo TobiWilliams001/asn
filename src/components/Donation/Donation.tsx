@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+<<<<<<< HEAD
 import { useRouter } from 'next/navigation'; // Import functionality from original
 import FadeInUp from '../shared/FadeInUp';
 
@@ -8,6 +9,13 @@ export default function Donation() {
   const router = useRouter();
 
   // Restoring the original navigation logic
+=======
+import { manual } from '../../styles/font';
+import { useRouter } from 'next/navigation';
+
+const Donation = () => {
+  const router = useRouter();
+>>>>>>> feature/v2-authentication
   const handleDonate = () => {
     router.push('/donate');
   };
