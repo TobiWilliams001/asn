@@ -1,11 +1,12 @@
 import Image from 'next/image'
 import React from 'react'
-import BlogHerobody from '../Herobody/BlogHerobody'
 import NavBar from '../NavBar/NavBar'
+import DonateHerobody from '../Herobody/DonateHeroBody'
+import DonateForm from '../Herobody/DonateForm'
 
-const BlogHero = () => {
+const DonateHero = () => {
   return (
-    <div className="relative min-h-screen bg-[#402527] w-full" id="home">
+    <div className="relative bg-[#402527] w-full" id="home">
         {/* ✅ Fixed Image Path & Ensured Full Coverage */}
         <Image 
             src="/asn_bg.svg" 
@@ -19,11 +20,12 @@ const BlogHero = () => {
         <div className="relative w-full">
             <div className="max-w-screen-xl mx-auto lg:px-20 lg:py-12 md:p-10 p-6 w-full">
                 <NavBar />
-                <BlogHerobody />
+                <DonateHerobody />
+                {/* <DonateForm /> */}
             </div>
         </div>
     </div>
   )
 }
 
-export default BlogHero
+export default DonateHero
