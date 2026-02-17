@@ -21,5 +21,5 @@ try {
 }
 
 export const learnAuth = getAuth(learn_app);
-export const learnDb = getFirestore(learn_app);
+export const learnDb = getFirestore(learn_app, 'default');
 export default learn_app;

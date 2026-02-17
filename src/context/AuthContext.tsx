@@ -20,6 +20,7 @@ interface AuthContextType {
   signup: (data: SignupData) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthContextType>({
@@ -29,6 +30,7 @@ export const AuthContext = createContext<AuthContextType>({
   signup: async () => {},
   login: async () => {},
   logout: async () => {},
+  refreshProfile: async () => {},
 });
 
 export const useAuthContext = () => useContext(AuthContext);
@@ -39,30 +41,42 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const refreshProfile = async (currentUser?: User) => {
+    const uid = currentUser?.uid || user?.uid;
+    if (!uid) return;
+    try {
+      const profile = await getUserProfile(uid);
+      setUserProfile(profile);
+    } catch (err) {
+      console.warn('Refresh Profile Error:', err);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(learnAuth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
-        try {
-          const profile = await getUserProfile(firebaseUser.uid);
-          setUserProfile(profile);
-        } catch (err) {
-          console.warn('Could not fetch user profile:', err);
-          setUserProfile(null);
-        }
+        // Fetch profile but don't block the loading state on it
+        getUserProfile(firebaseUser.uid)
+          .then((profile) => setUserProfile(profile))
+          .catch((err) => {
+            console.warn('Could not fetch user profile:', err);
+            setUserProfile(null);
+          })
+          .finally(() => setLoading(false));
       } else {
         setUser(null);
         setUserProfile(null);
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => unsubscribe();
   }, []);
 
   const signup = async (data: SignupData) => {
-    const { user, profile } = await signupUser(data);
-    setUser(user);
+    const { user: newUser, profile } = await signupUser(data);
+    setUser(newUser);
     setUserProfile(profile);
   };
 
@@ -86,7 +100,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, userProfile, loading, signup, login, logout }}>
+    <AuthContext.Provider value={{ user, userProfile, loading, signup, login, logout, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
