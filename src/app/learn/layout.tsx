@@ -78,12 +78,9 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#ea2a33]/5 rounded-full blur-3xl" />
       </div>
 
-      {/* ── NOT LOGGED IN: main site NavBar ──
-          Logo links to "/" (main site), has Sign In / Sign Up / Donate
-          Users on auth pages can navigate back to main site naturally */}
+      
       {!user && <NavBar />}
 
-      {/* ── LOGGED IN: floating profile pill (top-right only) ── */}
       {user && (
         <nav className="fixed top-0 right-0 z-50 p-4 sm:p-6">
           <div className="flex items-center gap-3">
