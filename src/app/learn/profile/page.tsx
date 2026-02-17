@@ -1,45 +1,26 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import {
   Mail,
   MapPin,
-  BookOpen,
-  Award,
-  Clock,
   Edit2,
-  ChevronRight,
+  Save,
+  X,
   GraduationCap,
-  Target,
-  Calendar,
+  Briefcase,
+  Camera,
+  CheckCircle,
+  AlertCircle,
+  User,
+  Globe as GlobeIcon,
+  Loader2,
 } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthContext } from '@/context/AuthContext';
-
-const mockStats = {
-  modulesCompleted: 1,
-  totalModules: 5,
-  lessonsCompleted: 12,
-  totalLessons: 45,
-  hoursLearned: 8,
-  certificatesEarned: 0,
-  streak: 5,
-};
-
-const mockAchievements = [
-  { id: 1, title: 'First Step', description: 'Completed your first lesson', earned: true, date: '2024-01-16' },
-  { id: 2, title: 'Module Master', description: 'Completed Module 1', earned: true, date: '2024-01-28' },
-  { id: 3, title: 'Week Warrior', description: '7-day learning streak', earned: false, date: null },
-  { id: 4, title: 'Halfway Hero', description: 'Complete 50% of ASAP', earned: false, date: null },
-  { id: 5, title: 'ASAP Graduate', description: 'Complete the entire program', earned: false, date: null },
-];
-
-const mockCurrentModule = {
-  id: 2,
-  title: 'Corporate Awareness',
-  progress: 25,
-};
+import { doc, setDoc } from 'firebase/firestore';
+import { learnDb } from '@/firebase/learnConfig';
+import { updateProfile } from 'firebase/auth';
 
 export default function ProfilePage() {
   return (
@@ -50,270 +31,385 @@ export default function ProfilePage() {
 }
 
 function ProfileContent() {
-  const { user, userProfile } = useAuthContext();
+  const { user, userProfile, refreshProfile } = useAuthContext();
   const [isEditing, setIsEditing] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const fullName = userProfile?.fullName || user?.displayName || 'User';
+  const [formData, setFormData] = useState({
+    fullName: userProfile?.fullName || user?.displayName || '',
+    bio: userProfile?.bio || '',
+    country: userProfile?.country || '',
+    institution: userProfile?.institution || '',
+    currentStatus: userProfile?.currentStatus || '',
+  });
+
+  const fullName = formData.fullName || userProfile?.fullName || user?.displayName || 'User';
   const nameParts = fullName.split(' ');
   const firstName = nameParts[0] || '';
-  const lastName = nameParts.slice(1).join(' ') || '';
-  const initials = `${firstName[0] || ''}${lastName[0] || ''}`.toUpperCase();
+  const initials = firstName.charAt(0).toUpperCase() + (nameParts[1]?.charAt(0).toUpperCase() || '');
   const email = userProfile?.email || user?.email || '';
-  const country = userProfile?.country || '';
-  const currentStatus = userProfile?.currentStatus?.replace('_', ' ') || '';
-  const institution = userProfile?.institution || '';
-  const role = userProfile?.role || 'free';
-  const bio =
-    userProfile?.bio ||
-    'Aspiring professional passionate about growth and learning through the ASAP program.';
 
-  const progressPercentage = Math.round(
-    (mockStats.modulesCompleted / mockStats.totalModules) * 100
-  );
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+
+    setIsSaving(true);
+    setSaveStatus('idle');
+    setErrorMessage('');
+
+    try {
+      console.log('🔄 Starting profile update...');
+      console.log('User ID:', user.uid);
+      console.log('Data to save:', formData);
+
+      const userDocRef = doc(learnDb, 'users', user.uid);
+      
+      // Use setDoc with merge instead of updateDoc
+      await setDoc(userDocRef, {
+        fullName: formData.fullName,
+        bio: formData.bio,
+        country: formData.country,
+        institution: formData.institution,
+        currentStatus: formData.currentStatus,
+        updatedAt: new Date(),
+      }, { merge: true });
+
+      console.log('✅ Firestore update successful');
+
+      if (formData.fullName !== user.displayName) {
+        await updateProfile(user, {
+          displayName: formData.fullName,
+        });
+        console.log('✅ Firebase Auth profile updated');
+      }
+
+      console.log('🔄 Refreshing profile...');
+      await refreshProfile();
+      console.log('✅ Profile refresh complete');
+
+      setSaveStatus('success');
+      setTimeout(() => {
+        setIsEditing(false);
+        setSaveStatus('idle');
+      }, 2000);
+    } catch (error: any) {
+      console.error('❌ Profile update error:', error);
+      console.error('Error code:', error.code);
+      console.error('Error message:', error.message);
+      
+      let userMessage = 'Unknown error occurred';
+      
+      if (error.code === 'permission-denied') {
+        userMessage = 'Permission denied. Try logging out and back in.';
+      } else if (error.code === 'unauthenticated') {
+        userMessage = 'Session expired. Please log in again.';
+      } else if (error.message) {
+        userMessage = error.message;
+      }
+      
+      setErrorMessage(userMessage);
+      setSaveStatus('error');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCancel = () => {
+    setFormData({
+      fullName: userProfile?.fullName || user?.displayName || '',
+      bio: userProfile?.bio || '',
+      country: userProfile?.country || '',
+      institution: userProfile?.institution || '',
+      currentStatus: userProfile?.currentStatus || '',
+    });
+    setIsEditing(false);
+    setSaveStatus('idle');
+    setErrorMessage('');
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'student':
+        return GraduationCap;
+      case 'professional':
+        return Briefcase;
+      case 'entrepreneur':
+        return GlobeIcon;
+      case 'job_seeker':
+        return User;
+      default:
+        return Briefcase;
+    }
+  };
+
+  const StatusIcon = getStatusIcon(formData.currentStatus);
 
   return (
-    <div className="min-h-screen bg-[#0d0d0d]">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-[#181111] to-[#261c1c] border-b border-[#3d2c2c]">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
-            {/* Avatar */}
-            <div className="w-16 h-16 sm:w-24 sm:h-24 rounded-full bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white text-xl sm:text-3xl font-bold shadow-lg flex-shrink-0">
-              {initials}
-            </div>
+    <div className="min-h-screen relative">
+      {/* Background gradient */}
+      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0506] via-[#181111] to-[#0f0909] overflow-hidden">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ea2a33] rounded-full mix-blend-multiply filter blur-[140px] opacity-10 animate-blob"></div>
+        <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#c41e3a] rounded-full mix-blend-multiply filter blur-[140px] opacity-10 animate-blob animation-delay-2000"></div>
+      </div>
 
-            {/* User Info */}
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-white truncate">
-                  {fullName}
-                </h1>
+      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Profile Settings</h1>
+          <p className="text-gray-400">Manage your account information and preferences</p>
+        </div>
+
+        {/* Profile Card */}
+        <div className="bg-[#1a1314]/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
+          {/* Header gradient */}
+          <div className="relative h-32 sm:h-40 bg-gradient-to-r from-[#ea2a33]/20 via-[#c41e3a]/10 to-transparent" />
+
+          {/* Profile Content */}
+          <div className="relative px-6 sm:px-8 pb-8">
+            {/* Avatar & Edit Button */}
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-20 mb-6 gap-4">
+              <div className="relative inline-block">
+                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white text-4xl font-bold shadow-2xl border-4 border-[#1a1314]">
+                  {user?.photoURL ? (
+                    <img
+                      src={user.photoURL}
+                      alt="Profile"
+                      className="w-full h-full rounded-3xl object-cover"
+                    />
+                  ) : (
+                    initials
+                  )}
+                </div>
                 <button
-                  onClick={() => setIsEditing(!isEditing)}
-                  className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors flex-shrink-0"
-                  data-testid="button-edit-profile"
+                  className="absolute bottom-1 right-1 w-10 h-10 bg-[#ea2a33] hover:bg-[#b91c1c] rounded-xl flex items-center justify-center text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                  title="Change photo"
                 >
-                  <Edit2 className="w-4 h-4" />
+                  <Camera size={18} />
                 </button>
               </div>
 
-              <p className="text-gray-400 mb-3 text-sm sm:text-base leading-relaxed">
-                {bio}
-              </p>
-
-              <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-400">
-                {institution && (
-                  <span className="flex items-center gap-1.5">
-                    <GraduationCap className="w-4 h-4 flex-shrink-0" />
-                    {institution}
-                  </span>
-                )}
-                {country && (
-                  <span className="flex items-center gap-1.5">
-                    <MapPin className="w-4 h-4 flex-shrink-0" />
-                    {country}
-                  </span>
-                )}
-                {currentStatus && (
-                  <span className="flex items-center gap-1.5">
-                    <Calendar className="w-4 h-4 flex-shrink-0" />
-                    <span className="capitalize">{currentStatus}</span>
-                  </span>
-                )}
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="flex gap-4 sm:gap-6 mt-2 sm:mt-0 flex-shrink-0">
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-[#ea2a33]">{mockStats.streak}</div>
-                <div className="text-xs text-gray-400">Day Streak</div>
-              </div>
-              <div className="text-center">
-                <div className="text-xl sm:text-2xl font-bold text-white">{progressPercentage}%</div>
-                <div className="text-xs text-gray-400">Complete</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8">
-          {/* Left Column - Profile Details */}
-          <div className="lg:col-span-1 space-y-6">
-            {/* Contact Info Card */}
-            <div className="bg-[#181111] rounded-xl p-5 sm:p-6 border border-[#3d2c2c]">
-              <h2 className="text-base font-semibold text-white mb-4">Contact Information</h2>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 text-gray-300">
-                  <Mail className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                  <span className="text-sm break-all">{email}</span>
-                </div>
-                {country && (
-                  <div className="flex items-center gap-3 text-gray-300">
-                    <MapPin className="w-4 h-4 text-gray-500 flex-shrink-0" />
-                    <span className="text-sm">{country}</span>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Your Info Card */}
-            <div className="bg-[#181111] rounded-xl p-5 sm:p-6 border border-[#3d2c2c]">
-              <h2 className="text-base font-semibold text-white mb-4">Your Info</h2>
-              <div className="space-y-4">
-                {currentStatus && (
-                  <div>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1">
-                      Status
-                    </div>
-                    <div className="text-sm text-gray-300 capitalize">{currentStatus}</div>
-                  </div>
-                )}
-                {institution && (
-                  <div>
-                    <div className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1">
-                      Institution/Organization
-                    </div>
-                    <div className="text-sm text-gray-300">{institution}</div>
-                  </div>
-                )}
-                <div>
-                  <div className="text-[10px] text-gray-500 uppercase tracking-wider font-medium mb-1">
-                    Account Type
-                  </div>
-                  <div className="text-sm text-gray-300 capitalize">{role}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Progress & Achievements */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Learning Stats */}
-            <div className="bg-[#181111] rounded-xl p-5 sm:p-6 border border-[#3d2c2c]">
-              <h2 className="text-base font-semibold text-white mb-5">Learning Progress</h2>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-                <div className="bg-[#261c1c] rounded-lg p-3 sm:p-4 text-center">
-                  <BookOpen className="w-5 h-5 text-[#ea2a33] mx-auto mb-2" />
-                  <div className="text-lg sm:text-2xl font-bold text-white">
-                    {mockStats.modulesCompleted}/{mockStats.totalModules}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider">Modules</div>
-                </div>
-                <div className="bg-[#261c1c] rounded-lg p-3 sm:p-4 text-center">
-                  <Target className="w-5 h-5 text-[#ea2a33] mx-auto mb-2" />
-                  <div className="text-lg sm:text-2xl font-bold text-white">
-                    {mockStats.lessonsCompleted}/{mockStats.totalLessons}
-                  </div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider">Lessons</div>
-                </div>
-                <div className="bg-[#261c1c] rounded-lg p-3 sm:p-4 text-center">
-                  <Clock className="w-5 h-5 text-[#ea2a33] mx-auto mb-2" />
-                  <div className="text-lg sm:text-2xl font-bold text-white">{mockStats.hoursLearned}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider">Hours</div>
-                </div>
-                <div className="bg-[#261c1c] rounded-lg p-3 sm:p-4 text-center">
-                  <Award className="w-5 h-5 text-[#ea2a33] mx-auto mb-2" />
-                  <div className="text-lg sm:text-2xl font-bold text-white">{mockStats.certificatesEarned}</div>
-                  <div className="text-[10px] sm:text-xs text-gray-400 uppercase tracking-wider">Certificates</div>
-                </div>
-              </div>
-
-              {/* Overall Progress Bar */}
-              <div>
-                <div className="flex justify-between text-sm mb-2">
-                  <span className="text-gray-400 text-xs sm:text-sm">Overall ASAP Progress</span>
-                  <span className="text-white font-medium text-xs sm:text-sm">{progressPercentage}%</span>
-                </div>
-                <div className="h-2.5 bg-[#261c1c] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#ea2a33] to-[#f87171] rounded-full transition-all duration-500"
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Current Module */}
-            <div className="bg-[#181111] rounded-xl p-5 sm:p-6 border border-[#3d2c2c]">
-              <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-                <h2 className="text-base font-semibold text-white">Continue Learning</h2>
-                <Link
-                  href="/learn/dashboard"
-                  className="text-[#ea2a33] text-sm hover:underline font-medium"
-                  data-testid="link-view-all-modules"
-                >
-                  View All Modules
-                </Link>
-              </div>
-              <Link
-                href={`/learn/modules/${mockCurrentModule.id}`}
-                className="block bg-[#261c1c] rounded-lg p-4 hover:bg-[#3d2c2c] transition-colors group"
-                data-testid="link-current-module"
-              >
-                <div className="flex items-center justify-between gap-4">
-                  <div className="min-w-0">
-                    <div className="text-white font-medium mb-1">{mockCurrentModule.title}</div>
-                    <div className="text-sm text-gray-400">Module {mockCurrentModule.id} of 5</div>
-                  </div>
-                  <div className="flex items-center gap-4 flex-shrink-0">
-                    <div className="text-right">
-                      <div className="text-[#ea2a33] font-bold">{mockCurrentModule.progress}%</div>
-                      <div className="text-[10px] text-gray-400 uppercase tracking-wider">Complete</div>
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" />
-                  </div>
-                </div>
-                <div className="mt-3 h-2 bg-[#181111] rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-[#ea2a33] to-[#f87171] rounded-full transition-all duration-500"
-                    style={{ width: `${mockCurrentModule.progress}%` }}
-                  />
-                </div>
-              </Link>
-            </div>
-
-            {/* Achievements */}
-            <div className="bg-[#181111] rounded-xl p-5 sm:p-6 border border-[#3d2c2c]">
-              <h2 className="text-base font-semibold text-white mb-5">Achievements</h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                {mockAchievements.map((achievement) => (
-                  <div
-                    key={achievement.id}
-                    className={`flex items-center gap-3 p-3 sm:p-4 rounded-lg border transition-all ${
-                      achievement.earned
-                        ? 'bg-[#261c1c] border-[#ea2a33]/20'
-                        : 'bg-[#181111] border-[#2a2020] opacity-45'
-                    }`}
-                    data-testid={`achievement-${achievement.id}`}
-                  >
-                    <div
-                      className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                        achievement.earned
-                          ? 'bg-[#ea2a33]/15 text-[#ea2a33]'
-                          : 'bg-[#261c1c] text-gray-600'
-                      }`}
+              {/* Action Buttons */}
+              <div className="flex items-center gap-2">
+                {isEditing ? (
+                  <>
+                    <button
+                      onClick={handleCancel}
+                      disabled={isSaving}
+                      className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all disabled:opacity-50 active:scale-95"
                     >
-                      <Award className="w-5 h-5" />
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-semibold text-white text-sm truncate">
-                        {achievement.title}
-                      </div>
-                      <div className="text-xs text-gray-400 truncate">
-                        {achievement.description}
-                      </div>
-                      {achievement.earned && achievement.date && (
-                        <div className="text-[10px] text-[#ea2a33] mt-0.5 font-medium">
-                          Earned {achievement.date}
-                        </div>
+                      <X size={18} />
+                      <span className="hidden sm:inline">Cancel</span>
+                    </button>
+                    <button
+                      onClick={handleSave}
+                      disabled={isSaving}
+                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] hover:shadow-lg hover:shadow-[#ea2a33]/20 text-white rounded-xl transition-all disabled:opacity-50 font-semibold active:scale-95"
+                    >
+                      {isSaving ? (
+                        <>
+                          <Loader2 size={18} className="animate-spin" />
+                          Saving...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={18} />
+                          Save Changes
+                        </>
                       )}
-                    </div>
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    onClick={() => setIsEditing(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all font-semibold active:scale-95"
+                  >
+                    <Edit2 size={18} />
+                    Edit Profile
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Save Status */}
+            {saveStatus !== 'idle' && (
+              <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
+                {saveStatus === 'success' && (
+                  <div className="flex items-center gap-3 text-green-400 bg-green-500/10 border border-green-500/20 rounded-2xl px-5 py-3.5">
+                    <CheckCircle size={20} />
+                    <span className="font-medium">Profile updated successfully!</span>
                   </div>
-                ))}
+                )}
+                {saveStatus === 'error' && (
+                  <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3.5">
+                    <div className="flex items-center gap-3 text-red-400 mb-2">
+                      <AlertCircle size={20} />
+                      <span className="font-medium">Failed to update profile</span>
+                    </div>
+                    {errorMessage && (
+                      <p className="text-sm text-red-300 ml-8">{errorMessage}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Name & Bio Section */}
+            <div className="mb-8">
+              {isEditing ? (
+                <div className="space-y-5">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleInputChange}
+                      className="w-full text-2xl font-bold text-white bg-[#0f0a0b]/50 border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500"
+                      placeholder="Your full name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
+                      Bio
+                    </label>
+                    <textarea
+                      name="bio"
+                      value={formData.bio}
+                      onChange={handleInputChange}
+                      rows={3}
+                      className="w-full text-gray-300 bg-[#0f0a0b]/50 border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all resize-none placeholder:text-gray-500"
+                      placeholder="Tell us about yourself..."
+                    />
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">{fullName}</h2>
+                  {formData.bio ? (
+                    <p className="text-gray-400 text-lg leading-relaxed">{formData.bio}</p>
+                  ) : (
+                    <p className="text-gray-500 italic">No bio added yet</p>
+                  )}
+                </>
+              )}
+            </div>
+
+            {/* Profile Information Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              {/* Email */}
+              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <Mail size={22} className="text-[#ea2a33]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email</div>
+                    <div className="text-base text-white font-medium truncate">{email}</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Country */}
+              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <MapPin size={22} className="text-[#ea2a33]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Country</div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="country"
+                        value={formData.country}
+                        onChange={handleInputChange}
+                        className="w-full text-base text-white font-medium bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] placeholder:text-gray-500"
+                        placeholder="e.g., Nigeria"
+                      />
+                    ) : (
+                      <div className="text-base text-white font-medium">
+                        {formData.country || <span className="text-gray-500 italic">Not specified</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Current Status */}
+              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <StatusIcon size={22} className="text-[#ea2a33]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Status</div>
+                    {isEditing ? (
+                      <select
+                        name="currentStatus"
+                        value={formData.currentStatus}
+                        onChange={handleInputChange}
+                        className="w-full text-base text-white font-medium bg-[#0f0a0b] border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] appearance-none cursor-pointer"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
+                          backgroundPosition: 'right 0.5rem center',
+                          backgroundRepeat: 'no-repeat',
+                          backgroundSize: '1.5em 1.5em',
+                          paddingRight: '2.5rem'
+                        }}
+                      >
+                        <option value="" className="bg-[#1a1314]">Select status</option>
+                        <option value="student" className="bg-[#1a1314]">Student</option>
+                        <option value="professional" className="bg-[#1a1314]">Professional</option>
+                        <option value="entrepreneur" className="bg-[#1a1314]">Entrepreneur</option>
+                        <option value="job_seeker" className="bg-[#1a1314]">Job Seeker</option>
+                      </select>
+                    ) : (
+                      <div className="text-base text-white font-medium capitalize">
+                        {formData.currentStatus ? formData.currentStatus.replace('_', ' ') : (
+                          <span className="text-gray-500 italic">Not specified</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Institution */}
+              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <GraduationCap size={22} className="text-[#ea2a33]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+                      {formData.currentStatus === 'student' ? 'Institution' : 'Organization'}
+                    </div>
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        name="institution"
+                        value={formData.institution}
+                        onChange={handleInputChange}
+                        className="w-full text-base text-white font-medium bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] placeholder:text-gray-500"
+                        placeholder="e.g., University of Lagos"
+                      />
+                    ) : (
+                      <div className="text-base text-white font-medium">
+                        {formData.institution || <span className="text-gray-500 italic">Not specified</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             </div>
           </div>
