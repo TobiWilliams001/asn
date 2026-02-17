@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@paystack/inline-js':
+        specifier: ^2.22.7
+        version: 2.22.7
       '@tinymce/tinymce-react':
         specifier: ^4.3.0
         version: 4.3.2(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -48,6 +51,9 @@ importers:
       '@types/node':
         specifier: 20.17.6
         version: 20.17.6
+      '@types/paystack__inline-js':
+        specifier: ^1.0.2
+        version: 1.0.2
       '@types/react':
         specifier: 18.3.12
         version: 18.3.12
@@ -526,6 +532,10 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
+  '@paystack/inline-js@2.22.7':
+    resolution: {integrity: sha512-95/BkaJ61XTiL74k+x+3fp4NGDKHp4JZA9PXL+/DFd8gIPjI0TEA1ocHSjh1FRMIdpcfgpHLoTWMRvfBsQXstQ==}
+    engines: {node: '>= 22.0.0'}
+
   '@protobufjs/aspromise@1.1.2':
     resolution: {integrity: sha512-j+gKExEuLmKwvz3OgROXtrJ2UG2x8Ch2YZUxahh+s1F2HZ+wAceUNLkvy6zKCPVRkU++ZWQrdxsUeQXmcg4uoQ==}
 
@@ -584,6 +594,9 @@ packages:
 
   '@types/node@20.17.6':
     resolution: {integrity: sha512-VEI7OdvK2wP7XHnsuXbAJnEpEkF6NjSN45QJlL4VGqZSXsnicpesdTWsg9RISeSdYd3yeRj/y3k5KGjUXYnFwQ==}
+
+  '@types/paystack__inline-js@1.0.2':
+    resolution: {integrity: sha512-i7osAkFs+M9iOKLfzhpAMkOxgP0HZd+On4e5VOyvbetuzhWPXhCycYrC5j6IHtMfzXT+Av8tNVaRDQLE3N1Jfw==}
 
   '@types/prop-types@15.7.15':
     resolution: {integrity: sha512-F6bEyamV9jKGAFBEmlQnesRPGOQqS2+Uwi0Em15xenOxHaf2hv6L8YCVn3rPdPJOiJfPiCnLIRyvwVaqMY3MIw==}
@@ -2837,6 +2850,8 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
+  '@paystack/inline-js@2.22.7': {}
+
   '@protobufjs/aspromise@1.1.2': {}
 
   '@protobufjs/base64@1.1.2': {}
@@ -2890,6 +2905,8 @@ snapshots:
   '@types/node@20.17.6':
     dependencies:
       undici-types: 6.19.8
+
+  '@types/paystack__inline-js@1.0.2': {}
 
   '@types/prop-types@15.7.15': {}
 
