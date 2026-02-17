@@ -37,7 +37,7 @@ export default function SignupPage() {
     // For Google users: redirect to onboarding after auth
     // (Email users must verify first, so they won't have emailVerified yet)
     if (user && user.emailVerified) {
-      console.log('✅ User authenticated via Google, redirecting to onboarding');
+      console.log('User authenticated via Google, redirecting to onboarding');
       router.push('/onboarding');
     }
   }, [user, loading, router, success]);
@@ -127,7 +127,7 @@ export default function SignupPage() {
           
           <div className="bg-[#1a1314]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-200">
             <p className="text-gray-300 text-lg leading-relaxed">
-              We've sent a verification link to{' '}
+              We&apos;ve sent a verification link to{' '}
               <span className="text-white font-semibold">{formData.email}</span>
             </p>
             <p className="text-gray-400 mt-3">

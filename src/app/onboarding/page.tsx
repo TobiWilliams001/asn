@@ -1,410 +1,323 @@
 'use client';
 
-import { useState } from 'react';
-import {
-  Mail,
-  MapPin,
-  Edit2,
-  Save,
-  X,
-  GraduationCap,
-  Briefcase,
-  Camera,
-  CheckCircle,
-  AlertCircle,
-  User,
-  Globe as GlobeIcon,
-  Loader2,
-} from 'lucide-react';
-import ProtectedRoute from '@/components/ProtectedRoute';
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuthContext } from '@/context/AuthContext';
-import { doc, setDoc } from 'firebase/firestore';
 import { learnDb } from '@/firebase/learnConfig';
-import { updateProfile } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
+import { Globe, Briefcase, GraduationCap, ChevronRight, CheckCircle, Loader2, Building, Rocket, UserCircle, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 
-export default function ProfilePage() {
-  return (
-    <ProtectedRoute>
-      <ProfileContent />
-    </ProtectedRoute>
-  );
-}
+const COUNTRIES = [
+  'Nigeria', 
+  'Kenya', 
+  'Ghana', 
+  'South Africa', 
+  'Egypt',
+  'United Kingdom', 
+  'United States', 
+  'Canada',
+  'Germany',
+  'France',
+  'India',
+  'Australia',
+  'Other'
+];
 
-function ProfileContent() {
-  const { user, userProfile, refreshProfile } = useAuthContext();
-  const [isEditing, setIsEditing] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [errorMessage, setErrorMessage] = useState('');
+const STATUS_OPTIONS = [
+  { 
+    value: 'student', 
+    label: 'Student', 
+    icon: GraduationCap,
+    description: 'Currently pursuing education',
+    color: 'from-blue-500 to-cyan-500'
+  },
+  { 
+    value: 'professional', 
+    label: 'Professional', 
+    icon: Briefcase,
+    description: 'Working in the industry',
+    color: 'from-purple-500 to-pink-500'
+  },
+  { 
+    value: 'entrepreneur', 
+    label: 'Entrepreneur', 
+    icon: Rocket,
+    description: 'Building your own venture',
+    color: 'from-orange-500 to-red-500'
+  },
+  { 
+    value: 'job_seeker', 
+    label: 'Job Seeker', 
+    icon: UserCircle,
+    description: 'Exploring opportunities',
+    color: 'from-green-500 to-emerald-500'
+  },
+];
 
+export default function OnboardingPage() {
+  const { user, userProfile } = useAuthContext();
+  const router = useRouter();
+  
+  const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    fullName: userProfile?.fullName || user?.displayName || '',
-    bio: userProfile?.bio || '',
-    country: userProfile?.country || '',
-    institution: userProfile?.institution || '',
-    currentStatus: userProfile?.currentStatus || '',
+    country: '',
+    currentStatus: '',
+    institution: '',
   });
 
-  const fullName = formData.fullName || userProfile?.fullName || user?.displayName || 'User';
-  const nameParts = fullName.split(' ');
-  const firstName = nameParts[0] || '';
-  const initials = firstName.charAt(0).toUpperCase() + (nameParts[1]?.charAt(0).toUpperCase() || '');
-  const email = userProfile?.email || user?.email || '';
+  // Redirect if already complete
+  useEffect(() => {
+    if (userProfile?.onboardingComplete) {
+      router.push('/learn/dashboard');
+    }
+  }, [userProfile, router]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
-  };
-
-  const handleSave = async () => {
+  const handleComplete = async () => {
     if (!user) return;
-
-    setIsSaving(true);
-    setSaveStatus('idle');
-    setErrorMessage('');
+    setLoading(true);
 
     try {
-      console.log('🔄 Saving profile...', user.uid);
+      console.log('🔄 Saving onboarding...', user.uid);
 
-      const userDocRef = doc(learnDb, 'users', user.uid);
+      const userRef = doc(learnDb, 'users', user.uid);
 
-      // setDoc with merge - works even if doc doesn't exist yet
-      await setDoc(userDocRef, {
-        fullName: formData.fullName,
-        bio: formData.bio,
+      // setDoc with merge works whether doc exists or not
+      await setDoc(userRef, {
         country: formData.country,
-        institution: formData.institution || null,
         currentStatus: formData.currentStatus,
+        institution: formData.institution || null,
+        onboardingComplete: true,
         updatedAt: new Date(),
+        // Also set base fields in case signup didn't create the doc yet
+        id: user.uid,
+        email: user.email || '',
+        fullName: user.displayName || '',
+        role: 'free',
       }, { merge: true });
 
-      console.log('✅ Firestore saved');
+      console.log('✅ Onboarding saved!');
 
-      if (formData.fullName !== user.displayName) {
-        await updateProfile(user, { displayName: formData.fullName });
-        console.log('✅ Auth display name updated');
+      // DON'T await refreshProfile - it causes the long hang
+      // Redirect immediately, dashboard will load fresh profile
+      router.push('/learn/dashboard');
+
+    } catch (err: any) {
+      console.error('❌ Onboarding error:', err.code, err.message);
+      if (err.code === 'permission-denied') {
+        alert('Permission denied. Please log out and sign in again.');
+      } else {
+        alert(`Error: ${err.message}`);
       }
-
-      // DON'T await refreshProfile - it causes a hang
-      setSaveStatus('success');
-      setTimeout(() => {
-        setIsEditing(false);
-        setSaveStatus('idle');
-      }, 1500);
-
-    } catch (error: any) {
-      console.error('❌ Profile save error:', error.code, error.message);
-
-      let userMessage = 'Failed to save. Please try again.';
-      if (error.code === 'permission-denied') {
-        userMessage = 'Permission denied. Try logging out and back in.';
-      } else if (error.code === 'unauthenticated') {
-        userMessage = 'Session expired. Please log in again.';
-      } else if (error.message) {
-        userMessage = error.message;
-      }
-
-      setErrorMessage(userMessage);
-      setSaveStatus('error');
-    } finally {
-      setIsSaving(false);
+      setLoading(false);
     }
   };
-
-  const handleCancel = () => {
-    setFormData({
-      fullName: userProfile?.fullName || user?.displayName || '',
-      bio: userProfile?.bio || '',
-      country: userProfile?.country || '',
-      institution: userProfile?.institution || '',
-      currentStatus: userProfile?.currentStatus || '',
-    });
-    setIsEditing(false);
-    setSaveStatus('idle');
-    setErrorMessage('');
-  };
-
-  const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'student':
-        return GraduationCap;
-      case 'professional':
-        return Briefcase;
-      case 'entrepreneur':
-        return GlobeIcon;
-      case 'job_seeker':
-        return User;
-      default:
-        return Briefcase;
-    }
-  };
-
-  const StatusIcon = getStatusIcon(formData.currentStatus);
 
   return (
-    <div className="min-h-screen relative">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0a0506] via-[#181111] to-[#0f0909] overflow-hidden">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ea2a33] rounded-full mix-blend-multiply filter blur-[140px] opacity-10 animate-blob"></div>
-        <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#c41e3a] rounded-full mix-blend-multiply filter blur-[140px] opacity-10 animate-blob animation-delay-2000"></div>
+    <div className="min-h-screen bg-gradient-to-br from-[#0a0506] via-[#181111] to-[#0f0909] flex flex-col items-center justify-center px-4 py-8 relative overflow-hidden">
+      {/* Animated background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ea2a33] rounded-full mix-blend-multiply filter blur-[140px] opacity-20 animate-blob"></div>
+        <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#c41e3a] rounded-full mix-blend-multiply filter blur-[140px] opacity-20 animate-blob animation-delay-2000"></div>
+        <div className="absolute -bottom-32 left-1/2 w-96 h-96 bg-[#8b1625] rounded-full mix-blend-multiply filter blur-[140px] opacity-20 animate-blob animation-delay-4000"></div>
       </div>
 
-      <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Profile Settings</h1>
-          <p className="text-gray-400">Manage your account information and preferences</p>
+      {/* Logo and Progress */}
+      <div className="mb-12 text-center relative z-10">
+        <div className="mb-8 transform transition-transform hover:scale-105 duration-300">
+          <Image src="/Group.svg" alt="ASN Logo" width={120} height={50} className="mx-auto" />
         </div>
-
-        {/* Profile Card */}
-        <div className="bg-[#1a1314]/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-          {/* Header gradient */}
-          <div className="relative h-32 sm:h-40 bg-gradient-to-r from-[#ea2a33]/20 via-[#c41e3a]/10 to-transparent" />
-
-          {/* Profile Content */}
-          <div className="relative px-6 sm:px-8 pb-8">
-            {/* Avatar & Edit Button */}
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-20 mb-6 gap-4">
-              <div className="relative inline-block">
-                <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white text-4xl font-bold shadow-2xl border-4 border-[#1a1314]">
-                  {user?.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="Profile"
-                      className="w-full h-full rounded-3xl object-cover"
-                    />
-                  ) : (
-                    initials
-                  )}
-                </div>
-                <button
-                  className="absolute bottom-1 right-1 w-10 h-10 bg-[#ea2a33] hover:bg-[#b91c1c] rounded-xl flex items-center justify-center text-white shadow-lg transition-all hover:scale-105 active:scale-95"
-                  title="Change photo"
-                >
-                  <Camera size={18} />
-                </button>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
-                {isEditing ? (
-                  <>
-                    <button
-                      onClick={handleCancel}
-                      disabled={isSaving}
-                      className="flex items-center gap-2 px-5 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all disabled:opacity-50 active:scale-95"
-                    >
-                      <X size={18} />
-                      <span className="hidden sm:inline">Cancel</span>
-                    </button>
-                    <button
-                      onClick={handleSave}
-                      disabled={isSaving}
-                      className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] hover:shadow-lg hover:shadow-[#ea2a33]/20 text-white rounded-xl transition-all disabled:opacity-50 font-semibold active:scale-95"
-                    >
-                      {isSaving ? (
-                        <>
-                          <Loader2 size={18} className="animate-spin" />
-                          Saving...
-                        </>
-                      ) : (
-                        <>
-                          <Save size={18} />
-                          Save Changes
-                        </>
-                      )}
-                    </button>
-                  </>
-                ) : (
-                  <button
-                    onClick={() => setIsEditing(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white rounded-xl transition-all font-semibold active:scale-95"
-                  >
-                    <Edit2 size={18} />
-                    Edit Profile
-                  </button>
-                )}
-              </div>
-            </div>
-
-            {/* Save Status */}
-            {saveStatus !== 'idle' && (
-              <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
-                {saveStatus === 'success' && (
-                  <div className="flex items-center gap-3 text-green-400 bg-green-500/10 border border-green-500/20 rounded-2xl px-5 py-3.5">
-                    <CheckCircle size={20} />
-                    <span className="font-medium">Profile updated successfully!</span>
-                  </div>
-                )}
-                {saveStatus === 'error' && (
-                  <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3.5">
-                    <div className="flex items-center gap-3 text-red-400 mb-2">
-                      <AlertCircle size={20} />
-                      <span className="font-medium">Failed to update profile</span>
-                    </div>
-                    {errorMessage && (
-                      <p className="text-sm text-red-300 ml-8">{errorMessage}</p>
-                    )}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Name & Bio Section */}
-            <div className="mb-8">
-              {isEditing ? (
-                <div className="space-y-5">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="fullName"
-                      value={formData.fullName}
-                      onChange={handleInputChange}
-                      className="w-full text-2xl font-bold text-white bg-[#0f0a0b]/50 border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500"
-                      placeholder="Your full name"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
-                      Bio
-                    </label>
-                    <textarea
-                      name="bio"
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                      rows={3}
-                      className="w-full text-gray-300 bg-[#0f0a0b]/50 border border-white/10 rounded-xl px-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all resize-none placeholder:text-gray-500"
-                      placeholder="Tell us about yourself..."
-                    />
-                  </div>
-                </div>
-              ) : (
-                <>
-                  <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">{fullName}</h2>
-                  {formData.bio ? (
-                    <p className="text-gray-400 text-lg leading-relaxed">{formData.bio}</p>
-                  ) : (
-                    <p className="text-gray-500 italic">No bio added yet</p>
-                  )}
-                </>
+        
+        {/* Progress Indicator */}
+        <div className="flex items-center gap-3 justify-center mb-4">
+          {[1, 2].map((s) => (
+            <div key={s} className="relative">
+              <div className={`h-2 w-16 rounded-full transition-all duration-500 ${
+                step >= s ? 'bg-gradient-to-r from-[#ea2a33] to-[#c41e3a]' : 'bg-white/10'
+              }`} />
+              {step >= s && (
+                <div className="absolute inset-0 bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] rounded-full animate-pulse opacity-50 blur-sm" />
               )}
             </div>
+          ))}
+        </div>
+        <p className="text-gray-400 text-sm font-medium">Step {step} of 2</p>
+      </div>
 
-            {/* Profile Information Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              {/* Email */}
-              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <Mail size={22} className="text-[#ea2a33]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email</div>
-                    <div className="text-base text-white font-medium truncate">{email}</div>
-                  </div>
+      <div className="w-full max-w-lg relative z-10">
+        <div className="bg-[#1a1314]/80 backdrop-blur-xl rounded-3xl p-8 md:p-10 border border-white/10 shadow-2xl relative overflow-hidden">
+          {/* Glass morphism accent */}
+          <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+          
+          {step === 1 ? (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+              {/* Header */}
+              <div className="text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-[#ea2a33]/20 to-[#c41e3a]/20 rounded-3xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-white/10 shadow-lg">
+                  <Globe className="text-[#ea2a33]" size={36} strokeWidth={1.5} />
+                </div>
+                <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
+                  Welcome! Let&apos;s get started
+                </h1>
+                <p className="text-gray-400 text-base leading-relaxed">
+                  Help us personalize your experience by sharing where you&apos;re from
+                </p>
+              </div>
+
+              {/* Country Selection */}
+              <div className="space-y-3">
+                <label className="block text-gray-300 text-sm font-medium ml-1">
+                  Select Your Country
+                </label>
+                <div className="relative">
+                  <select 
+                    className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-4 pr-10 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all appearance-none backdrop-blur-sm cursor-pointer hover:bg-[#0f0a0b]/70"
+                    value={formData.country}
+                    onChange={(e) => setFormData({...formData, country: e.target.value})}
+                  >
+                    <option value="" className="bg-[#1a1314] text-gray-400">Choose a country...</option>
+                    {COUNTRIES.map(c => (
+                      <option key={c} value={c} className="bg-[#1a1314] text-white">
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronRight 
+                    size={20} 
+                    className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90 pointer-events-none" 
+                  />
                 </div>
               </div>
 
-              {/* Country */}
-              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <MapPin size={22} className="text-[#ea2a33]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Country</div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="country"
-                        value={formData.country}
-                        onChange={handleInputChange}
-                        className="w-full text-base text-white font-medium bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] placeholder:text-gray-500"
-                        placeholder="e.g., Nigeria"
-                      />
-                    ) : (
-                      <div className="text-base text-white font-medium">
-                        {formData.country || <span className="text-gray-500 italic">Not specified</span>}
-                      </div>
-                    )}
-                  </div>
+              {/* Continue Button */}
+              <button 
+                disabled={!formData.country}
+                onClick={() => setStep(2)}
+                className="w-full bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-[#ea2a33]/20 transition-all active:scale-[0.98] group mt-8"
+              >
+                <span>Continue</span>
+                <ChevronRight size={18} className="transition-transform group-hover:translate-x-1" />
+              </button>
+            </div>
+          ) : (
+            <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-500">
+              {/* Header */}
+              <div className="text-center">
+                <div className="w-20 h-20 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl flex items-center justify-center mx-auto mb-6 backdrop-blur-sm border border-blue-500/20 shadow-lg">
+                  <Sparkles className="text-blue-400" size={36} strokeWidth={1.5} />
                 </div>
+                <h1 className="text-3xl font-bold text-white mb-3 tracking-tight">
+                  Tell us about yourself
+                </h1>
+                <p className="text-gray-400 text-base leading-relaxed">
+                  This helps us tailor content to your needs
+                </p>
               </div>
 
-              {/* Current Status */}
-              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <StatusIcon size={22} className="text-[#ea2a33]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Status</div>
-                    {isEditing ? (
-                      <select
-                        name="currentStatus"
-                        value={formData.currentStatus}
-                        onChange={handleInputChange}
-                        className="w-full text-base text-white font-medium bg-[#0f0a0b] border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] appearance-none cursor-pointer"
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                          backgroundPosition: 'right 0.5rem center',
-                          backgroundRepeat: 'no-repeat',
-                          backgroundSize: '1.5em 1.5em',
-                          paddingRight: '2.5rem'
-                        }}
+              {/* Status Selection */}
+              <div className="space-y-4">
+                <label className="block text-gray-300 text-sm font-medium ml-1">
+                  What best describes you?
+                </label>
+                <div className="grid grid-cols-1 gap-3">
+                  {STATUS_OPTIONS.map((status) => {
+                    const Icon = status.icon;
+                    const isSelected = formData.currentStatus === status.value;
+                    
+                    return (
+                      <button
+                        key={status.value}
+                        onClick={() => setFormData({...formData, currentStatus: status.value})}
+                        className={`group relative flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300 ${
+                          isSelected
+                          ? 'border-white/20 bg-gradient-to-r ' + status.color + ' shadow-lg scale-[1.02]' 
+                          : 'border-white/10 bg-[#0f0a0b]/50 hover:border-white/20 hover:bg-[#0f0a0b]/70'
+                        }`}
                       >
-                        <option value="" className="bg-[#1a1314]">Select status</option>
-                        <option value="student" className="bg-[#1a1314]">Student</option>
-                        <option value="professional" className="bg-[#1a1314]">Professional</option>
-                        <option value="entrepreneur" className="bg-[#1a1314]">Entrepreneur</option>
-                        <option value="job_seeker" className="bg-[#1a1314]">Job Seeker</option>
-                      </select>
-                    ) : (
-                      <div className="text-base text-white font-medium capitalize">
-                        {formData.currentStatus ? formData.currentStatus.replace('_', ' ') : (
-                          <span className="text-gray-500 italic">Not specified</span>
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                          isSelected 
+                          ? 'bg-white/20 backdrop-blur-sm' 
+                          : 'bg-white/5'
+                        }`}>
+                          <Icon size={24} className={isSelected ? 'text-white' : 'text-gray-400 group-hover:text-gray-300'} />
+                        </div>
+                        <div className="flex-1 text-left">
+                          <p className={`font-semibold text-base ${isSelected ? 'text-white' : 'text-gray-300'}`}>
+                            {status.label}
+                          </p>
+                          <p className={`text-sm mt-0.5 ${isSelected ? 'text-white/80' : 'text-gray-500'}`}>
+                            {status.description}
+                          </p>
+                        </div>
+                        {isSelected && (
+                          <CheckCircle size={24} className="text-white animate-in zoom-in duration-300" />
                         )}
-                      </div>
-                    )}
-                  </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Institution */}
-              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
-                    <GraduationCap size={22} className="text-[#ea2a33]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
-                      {formData.currentStatus === 'student' ? 'Institution' : 'Organization'}
-                    </div>
-                    {isEditing ? (
-                      <input
-                        type="text"
-                        name="institution"
-                        value={formData.institution}
-                        onChange={handleInputChange}
-                        className="w-full text-base text-white font-medium bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] placeholder:text-gray-500"
-                        placeholder="e.g., University of Lagos"
-                      />
-                    ) : (
-                      <div className="text-base text-white font-medium">
-                        {formData.institution || <span className="text-gray-500 italic">Not specified</span>}
-                      </div>
-                    )}
+              {/* Institution Input */}
+              {formData.currentStatus && (
+                <div className="space-y-3 animate-in fade-in slide-in-from-bottom-2 duration-500">
+                  <label className="block text-gray-300 text-sm font-medium ml-1">
+                    {formData.currentStatus === 'student' ? 'University/Institution Name' : 
+                     formData.currentStatus === 'professional' ? 'Company Name' :
+                     formData.currentStatus === 'entrepreneur' ? 'Venture/Company Name' :
+                     'Organization (Optional)'}
+                  </label>
+                  <div className="relative">
+                    <Building size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input 
+                      type="text"
+                      placeholder={
+                        formData.currentStatus === 'student' ? "e.g., University of Lagos" : 
+                        formData.currentStatus === 'professional' ? "e.g., Andela" :
+                        formData.currentStatus === 'entrepreneur' ? "e.g., MyStartup Inc" :
+                        "Organization name"
+                      }
+                      className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white pl-12 pr-4 py-4 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm"
+                      value={formData.institution}
+                      onChange={(e) => setFormData({...formData, institution: e.target.value})}
+                    />
                   </div>
                 </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button 
+                  onClick={() => setStep(1)}
+                  disabled={loading}
+                  className="flex-1 bg-white/5 backdrop-blur-sm border border-white/10 text-gray-300 font-semibold py-4 rounded-xl hover:bg-white/10 transition-all active:scale-[0.98] disabled:opacity-50"
+                >
+                  Back
+                </button>
+                <button 
+                  disabled={!formData.currentStatus || !formData.institution || loading}
+                  onClick={handleComplete}
+                  className="flex-[2] bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] text-white font-semibold py-4 rounded-xl flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-[#ea2a33]/20 transition-all active:scale-[0.98] group"
+                >
+                  {loading ? (
+                    <Loader2 className="animate-spin" size={20} />
+                  ) : (
+                    <>
+                      <span>Complete Setup</span>
+                      <Sparkles size={18} className="transition-transform group-hover:rotate-12" />
+                    </>
+                  )}
+                </button>
               </div>
             </div>
-          </div>
+          )}
         </div>
+
+        {/* Subtle bottom glow matching current step */}
+        <div className={`absolute -bottom-8 left-1/2 -translate-x-1/2 w-3/4 h-24 blur-3xl rounded-full pointer-events-none transition-colors duration-500 ${
+          step === 1 ? 'bg-[#ea2a33]/10' : 'bg-blue-500/10'
+        }`}></div>
       </div>
     </div>
   );

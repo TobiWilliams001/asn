@@ -60,7 +60,7 @@ export default function ForgotPasswordPage() {
           
           <div className="bg-[#1a1314]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-200">
             <p className="text-gray-300 text-lg leading-relaxed">
-              We've sent a password reset link to{' '}
+              We&apos;ve sent a password reset link to{' '}
               <span className="text-white font-semibold">{email}</span>
             </p>
             <p className="text-gray-400 mt-3">
@@ -122,7 +122,7 @@ export default function ForgotPasswordPage() {
               Reset Password
             </h1>
             <p className="text-gray-400 text-base leading-relaxed">
-              Enter your email and we'll send you a link to reset your password
+              Enter your email and we&apos;ll send you a link to reset your password
             </p>
           </div>
 

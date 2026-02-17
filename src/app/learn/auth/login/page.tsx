@@ -39,7 +39,7 @@ export default function LoginPage() {
     setError('');
     try {
       await loginWithGoogle();
-      // Don't manually redirect - let the useEffect handle it based on auth state
+
     } catch (err: any) {
       console.error('Google sign-in error:', err);
       setError('Unable to sign in with Google. Please try again.');
@@ -56,7 +56,7 @@ export default function LoginPage() {
     } catch (err: any) {
       console.error('Login error:', err);
       
-      // Better error messages based on Firebase error codes
+      // error messages based on Firebase error codes
       const errorMessage = err.message || '';
       
       if (errorMessage.includes('verify your email')) {
