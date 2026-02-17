@@ -1,8 +1,8 @@
 export const NAV_LINKS = [
   { label: 'Home', href: '/#home', type: 'anchor' },
   { label: 'About', href: '/#about', type: 'anchor' },
-  { label: 'Learn', href: '/learn', type: 'route' },
-  { label: 'Resources', href: '/learn/resources', type: 'route' },
+  { label: 'Accelerator', href: '/accelerator', type: 'route' }, 
+  { label: 'Resource Hub', href: '/resources-hub', type: 'route' }, 
   { label: 'Blog', href: '/blog', type: 'route' },
 ] as const;
 
@@ -12,13 +12,14 @@ export const SOCIAL_LINKS = [
   { label: 'Twitter', href: 'https://twitter.com/asn_africa', icon: 'X' },
   { label: 'YouTube', href: 'https://youtube.com/@ASNAfrica', icon: 'YT' },
 ];
+
 export const FOOTER_LINKS = [
   {
     heading: 'Programs',
     links: [
-      { label: 'ASAP Overview', href: '/learn/asap' },
+      { label: 'Accelerator Overview', href: '/accelerator' }, 
       { label: 'Enroll Now', href: '/learn/enroll' },
-      { label: 'Resources', href: '/learn/resources' },
+      { label: 'Resource Hub', href: '/resources-hub' }, 
       { label: 'Dashboard', href: '/learn/dashboard' },
     ],
   },

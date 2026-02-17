@@ -1,10 +1,17 @@
 "use client"
 import React from 'react'
 import { lato_font } from '../../styles/font'
+import { useRouter } from 'next/navigation' 
 
 const Herobody = () => {
-  const handleClick = () => {
+  const router = useRouter(); 
+
+  const handleWhatsApp = () => {
     window.open('https://chat.whatsapp.com/HYCmYQr45EB4QM080Rrr6t', '_blank');
+  };
+
+  const handleDonate = () => {
+    router.push('/donate'); 
   };
 
   return (
@@ -18,13 +25,25 @@ const Herobody = () => {
           Unlock Your Potential • Embrace Opportunities • Lead the Way
         </p>
 
-        <div className="w-full flex justify-center pb-12 md:pb-24 xl:pb-28 xl:pt-11 pt-3">
+        
+        <div className="w-full flex flex-col md:flex-row gap-4 justify-center items-center pb-12 md:pb-24 xl:pb-28 xl:pt-11 pt-3">
+          
+          
           <button
-            onClick={handleClick}
-            className="md:text-[16px] w-[198px] xl:w-[440px] md:w-[260px] md:h-[40px] xl:h-[72px] rounded-full bg-[#CC2630] h-[48px] text-white flex items-center justify-center xl:text-[24px] text-[14px] leading-none"
+            onClick={handleWhatsApp}
+            className="md:text-[16px] w-[198px] xl:w-[300px] md:w-[200px] md:h-[40px] xl:h-[72px] rounded-full bg-[#CC2630] h-[48px] text-white flex items-center justify-center xl:text-[24px] text-[14px] leading-none hover:bg-[#b01e28] transition-colors"
           >
             Get Involved
           </button>
+
+          
+          <button
+            onClick={handleDonate}
+            className="md:text-[16px] w-[198px] xl:w-[300px] md:w-[200px] md:h-[40px] xl:h-[72px] rounded-full border-2 border-white bg-transparent h-[48px] text-white flex items-center justify-center xl:text-[24px] text-[14px] leading-none hover:bg-white hover:text-[#CC2630] transition-colors"
+          >
+            Donate
+          </button>
+
         </div>
       </div>
     </div>

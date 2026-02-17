@@ -1,82 +1,133 @@
 "use client";
+import React, { useState } from "react";
+import { lato_font, manual } from "@/styles/font";
+import GlassCard from "../shared/GlassCard"; 
 
-import { useState } from "react";
-
-export default function DonateForm() {
-  const [name, setName] = useState("");
+const DonateForm = () => {
+  const [name, setName] = useState(""); 
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleDonate = async (e: React.FormEvent) => {
+  const handlePayment = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-    // Dynamically load Paystack (client-only)
-    const PaystackPop = (await import("@paystack/inline-js")).default;
+    try {
+      const PaystackPop = (await import("@paystack/inline-js")).default;
 
-    // Send donor info to backend to create reference
-    const res = await fetch("/api/paystack/initiate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, amount }),
-    });
+     
+      const res = await fetch("/api/paystack/initiate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, amount }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    const paystack = new PaystackPop();
+      
+      if (!data.reference && !data.status) {
+        alert("Payment initialization failed. Please check server logs.");
+        setLoading(false);
+        return;
+      }
 
-    paystack.newTransaction({
-      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
-      email: data.email,
-      amount: data.amount,
-      reference: data.reference,
+      const paystack = new PaystackPop();
+      paystack.newTransaction({
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY, 
+        email: email,
+        amount: parseFloat(amount) * 100, 
+        ref: data.reference, 
+        onSuccess: (transaction: any) => {
+          alert("Payment Successful! Reference: " + transaction.reference);
+          setLoading(false);
+        },
+        onCancel: () => {
+          alert("Transaction was closed.");
+          setLoading(false);
+        },
+      });
 
-      onSuccess: () => {
-        window.location.href = `/payment/processing?ref=${data.reference}`;
-      },
-
-      onCancel: () => {
-        alert("Donation cancelled");
-      },
-    });
+    } catch (error) {
+      console.error("Payment Error:", error);
+      alert("Something went wrong. Please try again.");
+      setLoading(false);
+    }
   };
 
   return (
-    <form
-      onSubmit={handleDonate}
-      className="flex flex-col gap-x-4 gap-y-5 w-full max-w-[650px]"
-    >
-      <input
-        type="text"
-        required
-        placeholder="Full Name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border p-2 outline-none rounded-xl h-12"
-      />
+    <div className="w-full max-w-md mx-auto relative z-10">
+      <GlassCard className="!p-8 !bg-[#1a0f0f]/80 !border-white/10 shadow-2xl">
+        <h3 className={`${manual.className} text-3xl text-white mb-2`}>
+          Make a Donation
+        </h3>
+        <p className={`${lato_font.className} text-white/60 mb-8`}>
+          Support African Students with a secure donation.
+        </p>
 
-      <input
-        type="email"
-        required
-        placeholder="Email Address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 outline-none rounded-xl h-12"
-      />
+        <form onSubmit={handlePayment} className="space-y-5">
+          {/* Full Name Input */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#CC2630] uppercase tracking-wider">
+              Full Name
+            </label>
+            <input
+              type="text"
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#CC2630] transition-colors"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
+          </div>
 
-      <input
-        type="text"
-        required
-        placeholder="Amount (NGN)"
-        value={amount}
-        onChange={(e) =>
-          setAmount(e.target.value.replace(/[^0-9]/g, ""))
-        }
-        className="border p-2 outline-none rounded-xl h-12"
-      />
+          {/* Email Input */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#CC2630] uppercase tracking-wider">
+              Email Address
+            </label>
+            <input
+              type="email"
+              required
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#CC2630] transition-colors"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
 
-      <button type="submit" className="bg-[#CC2630] text-white p-2 rounded-lg h-12">
-        Donate
-      </button>
-    </form>
+          {/* Amount Input */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-[#CC2630] uppercase tracking-wider">
+              Amount (₦)
+            </label>
+            <input
+              type="number"
+              required
+              min="100"
+              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/20 focus:outline-none focus:border-[#CC2630] transition-colors"
+              placeholder="5000"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white font-bold py-4 rounded-xl hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed mt-4 shadow-lg shadow-[#CC2630]/20"
+          >
+            {loading ? "Processing..." : `Donate ${amount ? '₦' + Number(amount).toLocaleString() : ''}`}
+          </button>
+          
+          <div className="text-center">
+             <p className="text-[10px] text-white/30 uppercase tracking-widest">Secured by Paystack</p>
+          </div>
+        </form>
+      </GlassCard>
+    </div>
   );
-}
+};
+
+export default DonateForm;
