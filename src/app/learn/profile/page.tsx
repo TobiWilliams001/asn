@@ -31,7 +31,7 @@ export default function ProfilePage() {
 }
 
 function ProfileContent() {
-  const { user, userProfile, refreshProfile } = useAuthContext();
+  const { user, userProfile } = useAuthContext(); 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
@@ -52,10 +52,7 @@ function ProfileContent() {
   const email = userProfile?.email || user?.email || '';
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handleSave = async () => {
@@ -66,47 +63,38 @@ function ProfileContent() {
     setErrorMessage('');
 
     try {
-      console.log('🔄 Starting profile update...');
-      console.log('User ID:', user.uid);
-      console.log('Data to save:', formData);
+      console.log('🔄 Saving profile...', user.uid);
 
       const userDocRef = doc(learnDb, 'users', user.uid);
-      
-      // Use setDoc with merge instead of updateDoc
+
+      // setDoc with merge - creates doc if missing, updates if exists
       await setDoc(userDocRef, {
         fullName: formData.fullName,
         bio: formData.bio,
         country: formData.country,
-        institution: formData.institution,
+        institution: formData.institution || null,
         currentStatus: formData.currentStatus,
         updatedAt: new Date(),
       }, { merge: true });
 
-      console.log('✅ Firestore update successful');
+      console.log('Firestore saved');
 
+      // Update Firebase Auth display name if it changed
       if (formData.fullName !== user.displayName) {
-        await updateProfile(user, {
-          displayName: formData.fullName,
-        });
-        console.log('✅ Firebase Auth profile updated');
+        await updateProfile(user, { displayName: formData.fullName });
+        console.log(' Auth display name updated');
       }
-
-      console.log('🔄 Refreshing profile...');
-      await refreshProfile();
-      console.log('✅ Profile refresh complete');
 
       setSaveStatus('success');
       setTimeout(() => {
         setIsEditing(false);
         setSaveStatus('idle');
-      }, 2000);
+      }, 1500);
+
     } catch (error: any) {
-      console.error('❌ Profile update error:', error);
-      console.error('Error code:', error.code);
-      console.error('Error message:', error.message);
-      
-      let userMessage = 'Unknown error occurred';
-      
+      console.error('Profile save error:', error.code, error.message);
+
+      let userMessage = 'Failed to save. Please try again.';
       if (error.code === 'permission-denied') {
         userMessage = 'Permission denied. Try logging out and back in.';
       } else if (error.code === 'unauthenticated') {
@@ -114,7 +102,7 @@ function ProfileContent() {
       } else if (error.message) {
         userMessage = error.message;
       }
-      
+
       setErrorMessage(userMessage);
       setSaveStatus('error');
     } finally {
@@ -137,16 +125,11 @@ function ProfileContent() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'student':
-        return GraduationCap;
-      case 'professional':
-        return Briefcase;
-      case 'entrepreneur':
-        return GlobeIcon;
-      case 'job_seeker':
-        return User;
-      default:
-        return Briefcase;
+      case 'student': return GraduationCap;
+      case 'professional': return Briefcase;
+      case 'entrepreneur': return GlobeIcon;
+      case 'job_seeker': return User;
+      default: return Briefcase;
     }
   };
 
@@ -154,36 +137,27 @@ function ProfileContent() {
 
   return (
     <div className="min-h-screen relative">
-      {/* Background gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-[#0a0506] via-[#181111] to-[#0f0909] overflow-hidden">
         <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ea2a33] rounded-full mix-blend-multiply filter blur-[140px] opacity-10 animate-blob"></div>
         <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#c41e3a] rounded-full mix-blend-multiply filter blur-[140px] opacity-10 animate-blob animation-delay-2000"></div>
       </div>
 
       <div className="relative max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-3xl sm:text-4xl font-bold text-white mb-2">Profile Settings</h1>
           <p className="text-gray-400">Manage your account information and preferences</p>
         </div>
 
-        {/* Profile Card */}
         <div className="bg-[#1a1314]/80 backdrop-blur-xl rounded-3xl border border-white/10 shadow-2xl overflow-hidden">
-          {/* Header gradient */}
           <div className="relative h-32 sm:h-40 bg-gradient-to-r from-[#ea2a33]/20 via-[#c41e3a]/10 to-transparent" />
 
-          {/* Profile Content */}
           <div className="relative px-6 sm:px-8 pb-8">
             {/* Avatar & Edit Button */}
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-20 mb-6 gap-4">
               <div className="relative inline-block">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white text-4xl font-bold shadow-2xl border-4 border-[#1a1314]">
                   {user?.photoURL ? (
-                    <img
-                      src={user.photoURL}
-                      alt="Profile"
-                      className="w-full h-full rounded-3xl object-cover"
-                    />
+                    <img src={user.photoURL} alt="Profile" className="w-full h-full rounded-3xl object-cover" />
                   ) : (
                     initials
                   )}
@@ -196,7 +170,6 @@ function ProfileContent() {
                 </button>
               </div>
 
-              {/* Action Buttons */}
               <div className="flex items-center gap-2">
                 {isEditing ? (
                   <>
@@ -214,15 +187,9 @@ function ProfileContent() {
                       className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] hover:shadow-lg hover:shadow-[#ea2a33]/20 text-white rounded-xl transition-all disabled:opacity-50 font-semibold active:scale-95"
                     >
                       {isSaving ? (
-                        <>
-                          <Loader2 size={18} className="animate-spin" />
-                          Saving...
-                        </>
+                        <><Loader2 size={18} className="animate-spin" /> Saving...</>
                       ) : (
-                        <>
-                          <Save size={18} />
-                          Save Changes
-                        </>
+                        <><Save size={18} /> Save Changes</>
                       )}
                     </button>
                   </>
@@ -238,7 +205,7 @@ function ProfileContent() {
               </div>
             </div>
 
-            {/* Save Status */}
+            {/* Save Status Banner */}
             {saveStatus !== 'idle' && (
               <div className="mb-6 animate-in fade-in slide-in-from-top-2 duration-300">
                 {saveStatus === 'success' && (
@@ -249,26 +216,22 @@ function ProfileContent() {
                 )}
                 {saveStatus === 'error' && (
                   <div className="bg-red-500/10 border border-red-500/20 rounded-2xl px-5 py-3.5">
-                    <div className="flex items-center gap-3 text-red-400 mb-2">
+                    <div className="flex items-center gap-3 text-red-400 mb-1">
                       <AlertCircle size={20} />
                       <span className="font-medium">Failed to update profile</span>
                     </div>
-                    {errorMessage && (
-                      <p className="text-sm text-red-300 ml-8">{errorMessage}</p>
-                    )}
+                    {errorMessage && <p className="text-sm text-red-300 ml-8">{errorMessage}</p>}
                   </div>
                 )}
               </div>
             )}
 
-            {/* Name & Bio Section */}
+            {/* Name & Bio */}
             <div className="mb-8">
               {isEditing ? (
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
-                      Full Name
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">Full Name</label>
                     <input
                       type="text"
                       name="fullName"
@@ -279,9 +242,7 @@ function ProfileContent() {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">
-                      Bio
-                    </label>
+                    <label className="block text-sm font-medium text-gray-300 mb-2 ml-1">Bio</label>
                     <textarea
                       name="bio"
                       value={formData.bio}
@@ -295,16 +256,15 @@ function ProfileContent() {
               ) : (
                 <>
                   <h2 className="text-3xl sm:text-4xl font-bold text-white mb-3">{fullName}</h2>
-                  {formData.bio ? (
-                    <p className="text-gray-400 text-lg leading-relaxed">{formData.bio}</p>
-                  ) : (
-                    <p className="text-gray-500 italic">No bio added yet</p>
-                  )}
+                  {formData.bio
+                    ? <p className="text-gray-400 text-lg leading-relaxed">{formData.bio}</p>
+                    : <p className="text-gray-500 italic">No bio added yet</p>
+                  }
                 </>
               )}
             </div>
 
-            {/* Profile Information Grid */}
+            {/* Info Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
               {/* Email */}
               <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
@@ -345,7 +305,7 @@ function ProfileContent() {
                 </div>
               </div>
 
-              {/* Current Status */}
+              {/* Status */}
               <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
                 <div className="flex items-start gap-4">
                   <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
@@ -375,9 +335,10 @@ function ProfileContent() {
                       </select>
                     ) : (
                       <div className="text-base text-white font-medium capitalize">
-                        {formData.currentStatus ? formData.currentStatus.replace('_', ' ') : (
-                          <span className="text-gray-500 italic">Not specified</span>
-                        )}
+                        {formData.currentStatus
+                          ? formData.currentStatus.replace('_', ' ')
+                          : <span className="text-gray-500 italic">Not specified</span>
+                        }
                       </div>
                     )}
                   </div>

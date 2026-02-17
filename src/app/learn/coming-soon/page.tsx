@@ -44,7 +44,7 @@ function ComingSoonContent() {
 
         {/* Description */}
         <p className="text-lg text-gray-400 mb-8 max-w-xl mx-auto">
-          We're working hard to bring you this feature. Stay tuned for updates!
+          We&apos;re working hard to bring you this feature. Stay tuned for updates!
         </p>
 
         {/* CTA Button */}
