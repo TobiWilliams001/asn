@@ -119,7 +119,7 @@ export default function Sidebar() {
                 New Features Coming
               </p>
               <p className="text-xs text-gray-400 leading-relaxed">
-                We're launching new tools regularly. Stay tuned!
+                We&apos;re launching new tools regularly. Stay tuned!
               </p>
             </div>
           </div>

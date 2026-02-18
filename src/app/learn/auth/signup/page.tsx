@@ -180,10 +180,12 @@ export default function SignupPage() {
             onClick={handleGoogle} 
             className="w-full flex items-center justify-center gap-3 py-4 bg-white text-black font-semibold rounded-xl hover:bg-gray-100 transition-all mb-8 group shadow-lg hover:shadow-xl"
           >
-            <img 
+            <Image 
               src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
               className="w-5 h-5 transition-transform group-hover:scale-110" 
-              alt="" 
+              alt="Google logo"
+              width={20}
+              height={20}
             />
             Continue with Google
           </button>

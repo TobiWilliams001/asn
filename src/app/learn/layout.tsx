@@ -104,7 +104,7 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
                 >
                   <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-[#ea2a33] overflow-hidden transition-transform group-hover:scale-105 flex-shrink-0">
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                      <Image src={user.photoURL} alt="Profile" width={32} height={32} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white font-bold text-xs">
                         {firstName.charAt(0).toUpperCase()}

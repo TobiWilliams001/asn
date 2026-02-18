@@ -75,7 +75,7 @@ export default function LearnNav() {
                 >
                   <div className="w-7 h-7 rounded-lg border-2 border-[#ea2a33] overflow-hidden flex-shrink-0">
                     {user.photoURL ? (
-                      <img src={user.photoURL} alt="" className="w-full h-full object-cover" />
+                      <Image src={user.photoURL} alt="" width={28} height={28} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-[#CC2630] to-[#a81f27] flex items-center justify-center text-white font-bold text-xs">
                         {firstName.charAt(0).toUpperCase()}

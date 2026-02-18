@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import {
   Mail,
   MapPin,
@@ -157,7 +158,7 @@ function ProfileContent() {
               <div className="relative inline-block">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white text-4xl font-bold shadow-2xl border-4 border-[#1a1314]">
                   {user?.photoURL ? (
-                    <img src={user.photoURL} alt="Profile" className="w-full h-full rounded-3xl object-cover" />
+                    <Image src={user.photoURL} alt="Profile" className="w-full h-full rounded-3xl object-cover" width={128} height={128} />
                   ) : (
                     initials
                   )}
