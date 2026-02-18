@@ -38,30 +38,29 @@ const BlogSectionHome = () => {
   }
 
   return (
-    <div className="px-4 sm:px-7 md:px-20 lg:px-[80px] xl:px-[120px] bg-white">
-      <div className="flex justify-between items-center pt-8 md:pt-[60px] xl:pt-[150px] pb-6">
-        <h1 className={`text-[#CC2630] font-medium text-2xl md:text-[42px] xl:text-[56px] ${manual.className}`}>
+    <div className="px-4 sm:px-6 md:px-10 lg:px-20 xl:px-[120px] bg-white">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-8 md:pt-[60px] xl:pt-[150px] pb-6">
+        <h1 className={`text-[#CC2630] font-medium text-3xl sm:text-4xl md:text-5xl xl:text-[56px] ${manual.className}`}>
           Our Blog
         </h1>
         
-        <div className="flex items-center gap-6">
-          {/* Manual Navigation Arrows */}
-          <div className="hidden md:flex gap-3">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <div className="hidden md:flex gap-2">
             <button 
               onClick={() => scroll('left')}
-              className="w-10 h-10 rounded-full border border-[#CC2630] flex items-center justify-center text-[#CC2630] hover:bg-[#CC2630] hover:text-white transition-all"
+              className="w-10 h-10 rounded-full border border-[#CC2630] flex items-center justify-center text-[#CC2630] hover:bg-[#CC2630] hover:text-white transition-all active:scale-95"
             >
               ←
             </button>
             <button 
               onClick={() => scroll('right')}
-              className="w-10 h-10 rounded-full border border-[#CC2630] flex items-center justify-center text-[#CC2630] hover:bg-[#CC2630] hover:text-white transition-all"
+              className="w-10 h-10 rounded-full border border-[#CC2630] flex items-center justify-center text-[#CC2630] hover:bg-[#CC2630] hover:text-white transition-all active:scale-95"
             >
               →
             </button>
           </div>
 
-          <Link href="/blog" className="flex items-center gap-2 text-[#CC2630] hover:opacity-70 transition-opacity text-sm md:text-base font-bold">
+          <Link href="/blog" className="flex items-center gap-2 text-[#CC2630] hover:opacity-70 transition-opacity text-sm sm:text-base font-bold whitespace-nowrap">
             Go to blog <ArrowRightIcon />
           </Link>
         </div>
@@ -72,14 +71,14 @@ const BlogSectionHome = () => {
           <PageButtonLoader />
         </div>
       ) : (
-        <div className="relative">
+        <div className="relative pb-8 md:pb-12">
           <div 
             ref={scrollRef}
-            className="flex gap-4 md:gap-8 overflow-x-auto pb-12 scrollbar-hide snap-x snap-mandatory"
+            className="flex gap-4 sm:gap-5 md:gap-6 lg:gap-8 overflow-x-auto scrollbar-hide snap-x snap-mandatory"
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
           >
             {optionsList?.map((option) => (
-              <div key={option?.id} className="snap-start shrink-0 w-[280px] sm:w-[350px] md:w-[400px]">
+              <div key={option?.id} className="snap-start shrink-0 w-[280px] sm:w-[320px] md:w-[380px] lg:w-[400px]">
                 <BlogCard data={option} />
               </div>
             ))}
