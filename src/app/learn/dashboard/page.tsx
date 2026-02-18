@@ -119,7 +119,7 @@ function WelcomeBanner({ firstName }: { firstName: string }) {
             {firstName}
           </h1>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[#b89d9f]">
-            We're building something powerful for you. Programs, resources, mentors, and community — all coming together in one place.
+            We&apos;re building something powerful for you. Programs, resources, mentors, and community — all coming together in one place.
           </p>
         </div>
 
