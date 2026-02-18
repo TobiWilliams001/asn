@@ -85,17 +85,17 @@ export default function ResourcesHubPage() {
               <span className="text-white font-semibold">interview mastery</span>.
             </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
               <Link
                 href="/learn/auth/signup"
-                className="group inline-flex items-center gap-2 bg-[#CC2630] hover:bg-[#b01e28] text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-black/30 active:scale-95"
+                className="group inline-flex items-center justify-center gap-2 bg-[#CC2630] hover:bg-[#b01e28] text-white px-8 py-4 rounded-full font-bold text-lg transition-all shadow-lg shadow-black/30 active:scale-95 w-full sm:w-auto"
               >
                 Access Library
                 <ArrowRight size={20} className="transition-transform group-hover:translate-x-1" />
               </Link>
               <button
                 onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
-                className="inline-flex items-center gap-2 border-2 border-white/50 hover:border-white hover:bg-white/10 text-white px-8 py-4 rounded-full font-bold text-lg transition-all"
+                className="inline-flex items-center justify-center gap-2 border-2 border-white/50 hover:border-white hover:bg-white/10 text-white px-8 py-4 rounded-full font-bold text-lg transition-all w-full sm:w-auto"
               >
                 Browse Resources
               </button>
@@ -119,7 +119,7 @@ export default function ResourcesHubPage() {
               <BookOpen size={14} className="text-[#ea2a33]" />
               <span className="text-xs font-bold text-[#ea2a33] uppercase tracking-wider">Categories</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">What&apos;s Inside</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">What's Inside</h2>
             <p className="text-lg text-[#b89d9f] max-w-2xl mx-auto">
               Everything you need to build a successful career, organized and ready to use
             </p>
@@ -133,7 +133,6 @@ export default function ResourcesHubPage() {
                   key={category.title}
                   className="group relative bg-[#1f1515]/80 backdrop-blur-xl border border-white/[0.07] rounded-2xl p-8 hover:border-[#ea2a33]/20 transition-all overflow-hidden"
                 >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${category.color} opacity-0 group-hover:opacity-[0.04] transition-opacity rounded-2xl`} />
                   <div className="relative">
                     <div className="flex items-center justify-between mb-6">
                       <div className={`w-12 h-12 bg-gradient-to-br ${category.color} rounded-xl flex items-center justify-center shadow-lg`}>
