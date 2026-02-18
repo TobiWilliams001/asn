@@ -1,48 +1,107 @@
-import {
-    onAuthStateChanged,
-    getAuth,
-} from 'firebase/auth';
-import { doc, DocumentData, getDoc, getFirestore } from 'firebase/firestore';
-import { useRouter } from 'next/navigation';
-import React, { createContext, ReactNode, useContext, useEffect, useState } from 'react';
-import firebase_app from '../firebase/config';
-import { PageButtonLoader } from '../components/Button/buttonload';
+'use client';
 
-const auth = getAuth(firebase_app);
-const firestore = getFirestore(firebase_app);
-export const AuthContext = createContext<{user: DocumentData | null, setUser: Function, }>({user: {}, setUser: () => {},});
+import { onAuthStateChanged, User } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
+import { learnAuth } from '../firebase/learnConfig';
+import {
+  UserProfile,
+  SignupData,
+  signupUser,
+  loginUser,
+  logoutUser,
+  getUserProfile
+} from '../services/authService';
+
+interface AuthContextType {
+  user: User | null;
+  userProfile: UserProfile | null;
+  loading: boolean;
+  signup: (data: SignupData) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  refreshProfile: () => Promise<void>;
+}
+
+export const AuthContext = createContext<AuthContextType>({
+  user: null,
+  userProfile: null,
+  loading: true,
+  signup: async () => {},
+  login: async () => {},
+  logout: async () => {},
+  refreshProfile: async () => {},
+});
 
 export const useAuthContext = () => useContext(AuthContext);
 
-export const AuthContextProvider = ({ children } : { children: ReactNode }) => {
-    const [user, setUser] = useState<DocumentData | null>(null);
-    const [loading, setLoading] = React.useState(true);
-    const router = useRouter()
+export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if(user) {
-                setUser(user);
-            } else {
-                setUser(null);
-                setLoading(false);
-                router.push("/");
-            }
-            setLoading(false);
-        });
+  const refreshProfile = async (currentUser?: User) => {
+    const uid = currentUser?.uid || user?.uid;
+    if (!uid) return;
+    try {
+      const profile = await getUserProfile(uid);
+      setUserProfile(profile);
+    } catch (err) {
+      console.warn('Refresh Profile Error:', err);
+    }
+  };
 
-        return () => unsubscribe();
-    }, [router]);
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(learnAuth, async (firebaseUser) => {
+      if (firebaseUser) {
+        setUser(firebaseUser);
+        // Fetch profile but don't block the loading state on it
+        getUserProfile(firebaseUser.uid)
+          .then((profile) => setUserProfile(profile))
+          .catch((err) => {
+            console.warn('Could not fetch user profile:', err);
+            setUserProfile(null);
+          })
+          .finally(() => setLoading(false));
+      } else {
+        setUser(null);
+        setUserProfile(null);
+        setLoading(false);
+      }
+    });
 
-    return (
-        <AuthContext.Provider value={{ user, setUser, }}>
-            {loading ? <div className='h-screen w-screen flex justify-center items-center' >
-                <div className='h-[60px] w-[60px]' >
-                    <PageButtonLoader />
-                </div>
-            </div> : children}
-        </AuthContext.Provider>
-    );
+    return () => unsubscribe();
+  }, []);
 
-    
-}
+  const signup = async (data: SignupData) => {
+    const { user: newUser, profile } = await signupUser(data);
+    setUser(newUser);
+    setUserProfile(profile);
+  };
+
+  const login = async (email: string, password: string) => {
+    const firebaseUser = await loginUser(email, password);
+    setUser(firebaseUser);
+    try {
+      const profile = await getUserProfile(firebaseUser.uid);
+      setUserProfile(profile);
+    } catch (err) {
+      console.warn('Could not fetch profile after login:', err);
+      setUserProfile(null);
+    }
+  };
+
+  const logout = async () => {
+    await logoutUser();
+    setUser(null);
+    setUserProfile(null);
+    router.push('/learn');
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, userProfile, loading, signup, login, logout, refreshProfile }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};

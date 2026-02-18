@@ -5,22 +5,19 @@ import NavBar from '../NavBar/NavBar'
 
 const BlogHero = () => {
   return (
-    <div className="relative min-h-screen bg-[#402527] w-full" id="home">
-        {/* ✅ Fixed Image Path & Ensured Full Coverage */}
+    <div className="relative min-h-screen bg-[#402527] w-full overflow-hidden" id="home">
         <Image 
             src="/asn_bg.svg" 
             fill 
             style={{ objectFit: "cover", mixBlendMode: "multiply" }} 
-            alt="Bgimage" 
+            alt="" 
             className="z-0" 
             priority
         />
         
-        <div className="relative w-full">
-            <div className="max-w-screen-xl mx-auto lg:px-20 lg:py-12 md:p-10 p-6 w-full">
-                <NavBar />
-                <BlogHerobody />
-            </div>
+        <div className="relative z-10 w-full min-h-screen">
+            <NavBar />
+            <BlogHerobody />
         </div>
     </div>
   )
