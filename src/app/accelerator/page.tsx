@@ -157,7 +157,7 @@ export default function AcceleratorPage() {
               <GraduationCap size={14} className="text-[#ea2a33]" />
               <span className="text-xs font-bold text-[#ea2a33] uppercase tracking-wider">Curriculum</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">What You'll Master</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">What You&apos;ll Master</h2>
             <p className="text-lg text-[#b89d9f] max-w-2xl mx-auto">
               Four modules designed to transform you from student to professional
             </p>
@@ -206,7 +206,7 @@ export default function AcceleratorPage() {
           </div>
 
           <div className="bg-[#1f1515] border border-white/[0.07] rounded-2xl p-10 md:p-12">
-            <div className="text-7xl text-[#ea2a33]/15 font-serif leading-none mb-4">"</div>
+            <div className="text-7xl text-[#ea2a33]/15 font-serif leading-none mb-4">&ldquo;</div>
             <p className="text-2xl md:text-3xl text-white leading-relaxed font-light mb-10">
               {TESTIMONIALS[currentTestimonial].quote}
             </p>

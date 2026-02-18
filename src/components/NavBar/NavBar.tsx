@@ -92,7 +92,7 @@ export default function NavBar() {
                   >
                     <div className="w-8 h-8 rounded-full border-2 border-[#ea2a33] overflow-hidden transition-transform group-hover:scale-105">
                       {user.photoURL ? (
-                        <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                        <Image src={user.photoURL} alt="Profile" width={32} height={32} className="w-full h-full object-cover" />
                       ) : (
                         <div className="w-full h-full bg-[#382929] flex items-center justify-center text-white font-bold text-xs">
                           {firstName.charAt(0).toUpperCase()}
@@ -138,7 +138,7 @@ export default function NavBar() {
               </a>
             </div>
 
-            {/* Mobile: Hamburger — visible below xl */}
+            {/* Mobile: Hamburger  */}
             <button
               className="xl:hidden text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
               onClick={() => setOpenNav(!openNav)}
@@ -174,7 +174,7 @@ export default function NavBar() {
                     <div className="flex items-center gap-3 px-4 py-3">
                       <div className="w-9 h-9 rounded-full border-2 border-[#ea2a33] overflow-hidden flex-shrink-0">
                         {user.photoURL ? (
-                          <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" />
+                          <Image src={user.photoURL} alt="Profile" width={36} height={36} className="w-full h-full object-cover" />
                         ) : (
                           <div className="w-full h-full bg-[#382929] flex items-center justify-center text-white font-bold text-sm">
                             {firstName.charAt(0).toUpperCase()}
@@ -217,7 +217,7 @@ export default function NavBar() {
         )}
       </nav>
 
-      {/* Spacer to prevent content jumping under fixed nav */}
+     
       {openNav && <div className="h-screen" onClick={() => setOpenNav(false)} />}
     </>
   );

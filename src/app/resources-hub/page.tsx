@@ -119,7 +119,7 @@ export default function ResourcesHubPage() {
               <BookOpen size={14} className="text-[#ea2a33]" />
               <span className="text-xs font-bold text-[#ea2a33] uppercase tracking-wider">Categories</span>
             </div>
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">What's Inside</h2>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-4">What&apos;s Inside</h2>
             <p className="text-lg text-[#b89d9f] max-w-2xl mx-auto">
               Everything you need to build a successful career, organized and ready to use
             </p>

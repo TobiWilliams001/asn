@@ -1,17 +1,26 @@
-name: Production CI
+name: Staging CI
 
 on:
+  push:
+    branches: [staging]
   pull_request:
-    branches: [main]
+    branches: [staging]
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      
+      - uses: pnpm/action-setup@v2  # Add PNPM
+        with:
+          version: 8
+          
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-      - run: npm ci
-      - run: npm run lint
-      - run: npm run build
+          cache: 'pnpm'  # Change from 'npm' to 'pnpm'
+          
+      - run: pnpm install  # Change from npm ci
+      - run: pnpm run lint
+      - run: pnpm run build
