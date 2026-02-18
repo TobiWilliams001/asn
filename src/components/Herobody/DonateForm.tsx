@@ -34,10 +34,10 @@ const DonateForm = () => {
 
       const paystack = new PaystackPop();
       paystack.newTransaction({
-        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY, 
+        key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY as string, 
         email: email,
         amount: parseFloat(amount) * 100, 
-        ref: data.reference, 
+        reference: data.reference, 
         onSuccess: (transaction: any) => {
           alert("Payment Successful! Reference: " + transaction.reference);
           setLoading(false);
