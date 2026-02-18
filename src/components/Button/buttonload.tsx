@@ -1,12 +1,22 @@
-import { TailSpin } from "react-loader-spinner";
+// import { TailSpin } from "react-loader-spinner";
 export const SecondButtonLoader = () => {
-    return (
-      <TailSpin color={"#fff"} height="21" width="21" />
-    )
-}
+  return (
+    <div 
+      className="inline-block h-[21px] w-[21px] animate-spin rounded-full border-2 border-solid border-white border-r-transparent"
+      role="status"
+    >
+      <span className="sr-only">Loading...</span>
+    </div>
+  );
+};
 
 export const PageButtonLoader = () => {
-    return (
-      <TailSpin color={"#CC2630"} height="60" width="60" />
-    )
-  }
+  return (
+    <div 
+      className="inline-block h-[60px] w-[60px] animate-spin rounded-full border-4 border-solid border-[#CC2630] border-r-transparent"
+      role="status"
+    >
+      <span className="sr-only">Loading...</span>
+    </div>
+  );
+};
