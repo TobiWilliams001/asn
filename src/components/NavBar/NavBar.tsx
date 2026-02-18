@@ -198,11 +198,11 @@ export default function NavBar() {
                     </button>
                   </>
                 ) : (
-                  <div className="flex flex-col gap-2 pt-1">
-                    <Link href="/learn/auth/login" onClick={() => setOpenNav(false)} className="block px-4 py-3 rounded-xl text-base font-semibold text-dark-text-accent hover:text-white hover:bg-white/5 transition-all">
+                  <div className="space-y-3 pt-2">
+                    <Link href="/learn/auth/login" onClick={() => setOpenNav(false)} className="block text-center px-4 py-3 rounded-xl text-base font-bold text-white hover:bg-white/5 transition-all">
                       Sign In
                     </Link>
-                    <Link href="/learn/auth/signup" onClick={() => setOpenNav(false)} className="block gradient-bg hover:opacity-90 text-white px-4 py-3 rounded-xl text-base font-semibold text-center transition-all">
+                    <Link href="/learn/auth/signup" onClick={() => setOpenNav(false)} className="block gradient-bg hover:opacity-90 text-white px-4 py-3.5 rounded-xl text-base font-bold text-center transition-all shadow-lg">
                       Sign Up
                     </Link>
                     <a href="#donation" onClick={() => setOpenNav(false)} className="block bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-3 rounded-xl text-base font-semibold text-center transition-all">
