@@ -8,6 +8,6 @@ export interface ArticleInterface {
     title: string;
     category: string;
     body: string;
-    image: any;
+    image: File | string;
     author: string;
 }
