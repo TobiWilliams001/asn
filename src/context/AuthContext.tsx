@@ -27,13 +27,21 @@ export const AuthContext = createContext<AuthContextType>({
   user: null,
   userProfile: null,
   loading: true,
-  signup: async () => {},
-  login: async () => {},
-  logout: async () => {},
-  refreshProfile: async () => {},
+  signup: async () => { },
+  login: async () => { },
+  logout: async () => { },
+  refreshProfile: async () => { },
 });
 
 export const useAuthContext = () => useContext(AuthContext);
+
+const setSessionCookie = () => {
+  document.cookie = '__session=true; path=/; max-age=604800; SameSite=Lax';
+};
+
+const clearSessionCookie = () => {
+  document.cookie = '__session=; path=/; max-age=0; SameSite=Lax';
+};
 
 export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -56,6 +64,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(learnAuth, async (firebaseUser) => {
       if (firebaseUser) {
         setUser(firebaseUser);
+        setSessionCookie();
         // Fetch profile but don't block the loading state on it
         getUserProfile(firebaseUser.uid)
           .then((profile) => setUserProfile(profile))
@@ -67,6 +76,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
       } else {
         setUser(null);
         setUserProfile(null);
+        clearSessionCookie();
         setLoading(false);
       }
     });
@@ -96,6 +106,7 @@ export const AuthContextProvider = ({ children }: { children: ReactNode }) => {
     await logoutUser();
     setUser(null);
     setUserProfile(null);
+    clearSessionCookie();
     router.push('/learn');
   };
 
