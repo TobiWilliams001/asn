@@ -1,4 +1,5 @@
 'use client'
+export const dynamic = 'force-dynamic';
 import { PageButtonLoader, SecondButtonLoader } from '@/components/Button/buttonload';
 import { updateArticle } from '@/firebase/auth/login';
 import firebase_app from '@/firebase/config';
