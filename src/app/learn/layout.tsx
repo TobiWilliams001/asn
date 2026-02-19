@@ -32,6 +32,7 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
 
   const fullName = userProfile?.fullName || user?.displayName || '';
   const firstName = fullName ? fullName.split(' ')[0] : (user?.email?.split('@')[0] || 'User');
+  const isAuthPage = pathname.startsWith('/learn/auth');
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -78,10 +79,10 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
         <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-[#ea2a33]/5 rounded-full blur-3xl" />
       </div>
 
-      
+
       {!user && <NavBar />}
 
-      {user && (
+      {user && !isAuthPage && (
         <nav className="fixed top-0 right-0 z-50 p-4 sm:p-6">
           <div className="flex items-center gap-3">
             {/* Mobile sidebar toggle */}
@@ -150,11 +151,10 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
 
       <div className="flex">
         {/* Desktop Sidebar */}
-        {user && (
+        {user && !isAuthPage && (
           <aside
-            className={`hidden lg:block fixed left-0 top-0 bottom-0 border-r border-white/[0.06] overflow-y-auto transition-all duration-300 z-40 ${
-              sidebarOpen ? 'w-64 xl:w-72' : 'w-16 xl:w-18'
-            }`}
+            className={`hidden lg:block fixed left-0 top-0 bottom-0 border-r border-white/[0.06] overflow-y-auto transition-all duration-300 z-40 ${sidebarOpen ? 'w-64 xl:w-72' : 'w-16 xl:w-18'
+              }`}
             style={{ background: 'rgba(24, 17, 17, 0.6)', backdropFilter: 'blur(24px)' }}
           >
             <div className="relative h-full">
@@ -174,11 +174,10 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
               <div className="p-2 xl:p-3 space-y-1">
                 <Link
                   href="/learn/dashboard"
-                  className={`flex items-center gap-3 px-3 py-2.5 xl:py-3 rounded-lg text-sm font-medium transition-all group ${
-                    isActive('/learn/dashboard')
+                  className={`flex items-center gap-3 px-3 py-2.5 xl:py-3 rounded-lg text-sm font-medium transition-all group ${isActive('/learn/dashboard')
                       ? 'bg-white/10 text-white'
                       : 'text-gray-400 hover:text-white hover:bg-white/10'
-                  }`}
+                    }`}
                   title={!sidebarOpen ? 'Dashboard' : ''}
                 >
                   <LayoutDashboard size={18} className="flex-shrink-0" />
@@ -195,11 +194,10 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
                     <Link
                       key={link.label}
                       href={link.href}
-                      className={`flex items-start gap-3 px-3 py-2.5 xl:py-3 rounded-lg text-sm font-medium transition-all group ${
-                        isActive(link.href)
+                      className={`flex items-start gap-3 px-3 py-2.5 xl:py-3 rounded-lg text-sm font-medium transition-all group ${isActive(link.href)
                           ? 'bg-white/10 text-white'
                           : 'text-gray-400 hover:text-white hover:bg-white/10'
-                      }`}
+                        }`}
                       title={!sidebarOpen ? link.label : ''}
                     >
                       <Icon size={18} className="mt-0.5 flex-shrink-0" />
@@ -218,7 +216,7 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
         )}
 
         {/* Mobile Sidebar */}
-        {user && sidebarOpen && (
+        {user && !isAuthPage && sidebarOpen && (
           <>
             <div className="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 animate-in fade-in duration-200" onClick={() => setSidebarOpen(false)} />
             <aside className="lg:hidden fixed left-0 top-0 bottom-0 w-72 sm:w-80 border-r border-white/[0.06] z-50 overflow-y-auto animate-in slide-in-from-left duration-300" style={{ background: 'rgba(24, 17, 17, 0.98)', backdropFilter: 'blur(24px)' }}>
@@ -230,9 +228,8 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
 
               <div className="p-4 space-y-2">
                 <Link href="/learn/dashboard" onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                    isActive('/learn/dashboard') ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'
-                  }`}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive('/learn/dashboard') ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'
+                    }`}
                 >
                   <LayoutDashboard size={20} />
                   <span>Dashboard</span>
@@ -244,9 +241,8 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
                   const Icon = link.icon;
                   return (
                     <Link key={link.label} href={link.href} onClick={() => setSidebarOpen(false)}
-                      className={`flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${
-                        isActive(link.href) ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'
-                      }`}
+                      className={`flex items-start gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${isActive(link.href) ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/10'
+                        }`}
                     >
                       <Icon size={20} className="mt-0.5 flex-shrink-0" />
                       <div className="flex-1 min-w-0">
@@ -264,11 +260,10 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
         )}
 
         {/* Main content — offset for NavBar height when not logged in */}
-        <main className={`flex-1 transition-all duration-300 relative min-h-screen ${
-          user
-            ? sidebarOpen ? 'lg:ml-64 xl:ml-72' : 'lg:ml-16 xl:ml-18'
+        <main className={`flex-1 transition-all duration-300 relative min-h-screen ${user
+            ? sidebarOpen && !isAuthPage ? 'lg:ml-64 xl:ml-72' : !isAuthPage ? 'lg:ml-16 xl:ml-18' : ''
             : 'pt-20 md:pt-24'
-        }`}>
+          }`}>
           {children}
         </main>
       </div>

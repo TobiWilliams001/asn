@@ -30,10 +30,10 @@ export default function SignupPage() {
   useEffect(() => {
     // Don't do anything while loading
     if (loading) return;
-    
+
     // Don't redirect if showing success screen for email signup
     if (success) return;
-    
+
     // For Google users: redirect to onboarding after auth
     // (Email users must verify first, so they won't have emailVerified yet)
     if (user && user.emailVerified) {
@@ -50,7 +50,7 @@ export default function SignupPage() {
     setError('');
     try {
       await loginWithGoogle();
-      // useEffect will handle redirect to onboarding
+      router.push('/onboarding');
     } catch (err: any) {
       console.error('Google sign-in error:', err);
       setError('Unable to sign in with Google. Please try again.');
@@ -89,9 +89,9 @@ export default function SignupPage() {
       setSuccess(true);
     } catch (err: any) {
       console.error('Signup error:', err);
-      
+
       const errorMessage = err.message || '';
-      
+
       if (errorMessage.includes('email-already-in-use')) {
         setError('This email is already registered. Try logging in instead.');
       } else if (errorMessage.includes('invalid-email')) {
@@ -103,7 +103,7 @@ export default function SignupPage() {
       } else {
         setError('Unable to create account. Please try again.');
       }
-      
+
       setIsLoading(false);
     }
   };
@@ -120,11 +120,11 @@ export default function SignupPage() {
           <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-green-500/20 to-emerald-500/20 rounded-3xl backdrop-blur-xl border border-green-500/30 mb-8 animate-in zoom-in duration-500">
             <CheckCircle className="text-green-400" size={48} strokeWidth={1.5} />
           </div>
-          
+
           <h2 className="text-4xl font-bold text-white mb-4 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-100">
             Check your email
           </h2>
-          
+
           <div className="bg-[#1a1314]/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 mb-8 animate-in fade-in slide-in-from-bottom-3 duration-500 delay-200">
             <p className="text-gray-300 text-lg leading-relaxed">
               We&apos;ve sent a verification link to{' '}
@@ -135,8 +135,8 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <Link 
-            href="/learn/auth/login" 
+          <Link
+            href="/learn/auth/login"
             className="inline-flex items-center gap-2 text-[#ea2a33] font-semibold hover:text-[#ff3944] transition-colors group animate-in fade-in duration-500 delay-300"
           >
             <span>Back to Login</span>
@@ -163,7 +163,7 @@ export default function SignupPage() {
       <div className="w-full max-w-md relative z-10">
         <div className="bg-[#1a1314]/80 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-          
+
           <div className="text-center mb-8">
             <div className="inline-flex items-center gap-2 mb-4">
               <h1 className="text-3xl font-bold text-white tracking-tight">
@@ -176,13 +176,13 @@ export default function SignupPage() {
             </p>
           </div>
 
-          <button 
-            onClick={handleGoogle} 
+          <button
+            onClick={handleGoogle}
             className="w-full flex items-center justify-center gap-3 py-4 bg-white text-black font-semibold rounded-xl hover:bg-gray-100 transition-all mb-8 group shadow-lg hover:shadow-xl"
           >
-            <Image 
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" 
-              className="w-5 h-5 transition-transform group-hover:scale-110" 
+            <Image
+              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+              className="w-5 h-5 transition-transform group-hover:scale-110"
               alt="Google logo"
               width={20}
               height={20}
@@ -206,18 +206,18 @@ export default function SignupPage() {
                 <span className="leading-relaxed">{error}</span>
               </div>
             )}
-            
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <label className="block text-gray-300 text-sm font-medium ml-1">
                   First Name
                 </label>
-                <input 
-                  type="text" 
-                  name="firstName" 
-                  placeholder="John" 
-                  required 
-                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm" 
+                <input
+                  type="text"
+                  name="firstName"
+                  placeholder="John"
+                  required
+                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm"
                   onChange={handleChange}
                   value={formData.firstName}
                 />
@@ -226,28 +226,28 @@ export default function SignupPage() {
                 <label className="block text-gray-300 text-sm font-medium ml-1">
                   Last Name
                 </label>
-                <input 
-                  type="text" 
-                  name="lastName" 
-                  placeholder="Doe" 
-                  required 
-                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm" 
+                <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Doe"
+                  required
+                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm"
                   onChange={handleChange}
                   value={formData.lastName}
                 />
               </div>
             </div>
-            
+
             <div className="space-y-2">
               <label className="block text-gray-300 text-sm font-medium ml-1">
                 Email Address
               </label>
-              <input 
-                type="email" 
-                name="email" 
-                placeholder="you@example.com" 
-                required 
-                className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm" 
+              <input
+                type="email"
+                name="email"
+                placeholder="you@example.com"
+                required
+                className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm"
                 onChange={handleChange}
                 value={formData.email}
               />
@@ -258,12 +258,12 @@ export default function SignupPage() {
                 Password
               </label>
               <div className="relative">
-                <input 
+                <input
                   type={showPassword ? "text" : "password"}
-                  name="password" 
-                  placeholder="Min. 6 characters" 
-                  required 
-                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 pr-12 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm" 
+                  name="password"
+                  placeholder="Min. 6 characters"
+                  required
+                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 pr-12 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm"
                   onChange={handleChange}
                   value={formData.password}
                 />
@@ -283,12 +283,12 @@ export default function SignupPage() {
                 Confirm Password
               </label>
               <div className="relative">
-                <input 
+                <input
                   type={showConfirmPassword ? "text" : "password"}
-                  name="confirmPassword" 
-                  placeholder="Re-enter password" 
-                  required 
-                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 pr-12 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm" 
+                  name="confirmPassword"
+                  placeholder="Re-enter password"
+                  required
+                  className="w-full bg-[#0f0a0b]/50 border border-white/10 text-white px-4 py-3.5 pr-12 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#ea2a33] focus:border-transparent transition-all placeholder:text-gray-500 backdrop-blur-sm"
                   onChange={handleChange}
                   value={formData.confirmPassword}
                 />
@@ -303,9 +303,9 @@ export default function SignupPage() {
               </div>
             </div>
 
-            <button 
-              type="submit" 
-              disabled={isLoading} 
+            <button
+              type="submit"
+              disabled={isLoading}
               className="w-full bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] text-white font-semibold py-4 rounded-xl transition-all flex items-center justify-center gap-2 hover:shadow-lg hover:shadow-[#ea2a33]/20 active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed mt-2 group"
             >
               {isLoading ? (
@@ -321,8 +321,8 @@ export default function SignupPage() {
 
           <p className="text-center mt-8 text-sm text-gray-400">
             Already have an account?{' '}
-            <Link 
-              href="/learn/auth/login" 
+            <Link
+              href="/learn/auth/login"
               className="text-[#ea2a33] font-semibold hover:text-[#ff3944] transition-colors"
             >
               Log in

@@ -13,7 +13,7 @@
 // USER & AUTHENTICATION
 // ============================================================================
 
-export interface User {
+export interface LearnUser {
   uid: string;
   email: string;
   displayName: string;

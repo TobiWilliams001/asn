@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps, getApp, FirebaseApp } from "firebase/app";
 import { getAuth } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
@@ -13,7 +13,7 @@ const learnFirebaseConfig = {
 
 const LEARN_APP_NAME = 'learn-platform';
 
-let learn_app;
+let learn_app: FirebaseApp;
 try {
   learn_app = getApp(LEARN_APP_NAME);
 } catch {

@@ -1,6 +1,6 @@
 'use client';
 
-import learn_app, { learnAuth, learnDb } from '@/firebase/learnConfig';
+import { learnAuth, learnDb } from '@/firebase/learnConfig';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -11,7 +11,7 @@ import {
   sendEmailVerification,
   User
 } from 'firebase/auth';
-import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 
 const googleProvider = new GoogleAuthProvider();
 
@@ -28,8 +28,8 @@ export interface UserProfile {
   role: 'free' | 'enrolled';
   bio?: string;
   onboardingComplete?: boolean;
-  createdAt: any;
-  updatedAt: any;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface SignupData {
@@ -60,7 +60,7 @@ async function syncGoogleUser(user: User) {
       id: user.uid,
       email: user.email || '',
       fullName: user.displayName || 'User',
-      country: '', 
+      country: '',
       currentStatus: 'other',
       institution: null,
       referralSource: 'Google',
@@ -107,12 +107,12 @@ export async function signupUser(data: SignupData) {
  */
 export async function loginUser(email: string, password: string): Promise<User> {
   const userCredential = await signInWithEmailAndPassword(learnAuth, email, password);
-  
+
   if (!userCredential.user.emailVerified) {
     await signOut(learnAuth);
     throw new Error("Please verify your email before logging in. Check your inbox!");
   }
-  
+
   return userCredential.user;
 }
 
