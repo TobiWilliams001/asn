@@ -1,8 +1,8 @@
 // src/lib/mockData/user.ts
 
-import { User, Enrollment, Progress } from '@/types/learn';
+import { LearnUser, Enrollment, Progress } from '@/types/learn';
 
-export const MOCK_USER: User = {
+export const MOCK_USER: LearnUser = {
   uid: 'mock-user-kwame-123',
   email: 'kwame.mensah@example.com',
   displayName: 'Kwame Mensah',
