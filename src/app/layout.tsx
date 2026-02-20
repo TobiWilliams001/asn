@@ -5,7 +5,7 @@ import { Providers } from '@/components/Providers'
 
 export const metadata: Metadata = {
   title: 'African Student Network',
-  description: 'We are equipping African students for global relevance central to career development, enterpreneur and leadership by building a viable network of change makers across diverse universities in Africa',
+  description: 'We are equipping African students for global relevance central to career development, entrepreneur and leadership by building a viable network of change makers across diverse universities in Africa',
 }
 
 export default function RootLayout({
