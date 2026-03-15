@@ -13,10 +13,9 @@ import {
 const SIDEBAR_LINKS = [
   {
     label: 'ASAP Program',
-    href: '/learn/coming-soon',
+    href: '/learn',
     icon: Rocket,
     description: 'Accelerator Program',
-    badge: 'Coming Soon'
   },
   {
     label: 'Resource Hub',
@@ -46,6 +45,7 @@ export default function Sidebar() {
 
   const isActive = (href: string) => {
     if (href === '/learn/coming-soon') return false;
+    if (href === '/learn') return pathname === '/learn';
     return pathname.startsWith(href);
   };
 
