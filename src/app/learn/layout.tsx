@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -65,7 +65,7 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
   };
 
   const sidebarLinks = [
-    { label: 'ASAP Program', href: '/learn/coming-soon?feature=asap', icon: BookOpen, description: 'Career accelerator' },
+    { label: 'ASAP Program', href: '/learn', icon: BookOpen, description: 'Career accelerator' },
     { label: 'Resource Hub', href: '/learn/coming-soon?feature=resources', icon: FolderOpen, description: 'Templates & guides' },
     { label: 'Community', href: '/learn/coming-soon?feature=community', icon: Users, description: 'Connect with peers' },
     { label: 'Mentorship', href: '/learn/coming-soon?feature=mentorship', icon: Lightbulb, description: '1-on-1 guidance' },
