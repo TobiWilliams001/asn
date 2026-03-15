@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 
 const CURRICULUM = [
   {
@@ -137,7 +137,7 @@ export default function ASAPOverviewPage() {
           <div className="relative">
             <h3 className="text-2xl md:text-3xl font-bold mb-4">Ready to Transform Your Future?</h3>
             <p className="text-white/80 mb-8 max-w-xl mx-auto">Take the first step toward becoming a globally competitive professional.</p>
-            <Link href="/learn/enroll" className="inline-block bg-white text-[#CC2630] px-10 py-4 rounded-xl text-lg font-bold hover:bg-white/90 transition-all">
+            <Link href="/learn/asap/enroll" className="inline-block bg-white text-[#CC2630] px-10 py-4 rounded-xl text-lg font-bold hover:bg-white/90 transition-all">
               Enroll Now
             </Link>
           </div>
