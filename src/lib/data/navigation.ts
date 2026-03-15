@@ -18,7 +18,7 @@ export const FOOTER_LINKS = [
     heading: 'Programs',
     links: [
       { label: 'Accelerator Overview', href: '/accelerator' }, 
-      { label: 'Enroll Now', href: '/learn/enroll' },
+      { label: 'Enroll Now', href: '/learn/asap/enroll' },
       { label: 'Resource Hub', href: '/resources-hub' }, 
       { label: 'Dashboard', href: '/learn/dashboard' },
     ],
