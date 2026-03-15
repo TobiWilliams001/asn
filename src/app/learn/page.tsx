@@ -1,4 +1,4 @@
-﻿import Link from 'next/link';
+import Link from 'next/link';
 
 const MODULES = [
   { id: 1, title: 'Career Mapping & Personal Branding', weekRange: 'Weeks 1-2', description: 'Define your career trajectory and build a compelling personal brand that positions you for global opportunities.', icon: '01' },
@@ -37,7 +37,7 @@ export default function LearnLandingPage() {
             academic excellence and professional mastery in the African corporate landscape.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/learn/enroll" className="bg-gradient-to-r from-[#CC2630] to-[#ea2a33] hover:opacity-90 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all">
+            <Link href="/learn/asap/enroll" className="bg-gradient-to-r from-[#CC2630] to-[#ea2a33] hover:opacity-90 text-white px-8 py-4 rounded-xl text-lg font-bold transition-all">
               Enroll Now
             </Link>
             <Link href="/learn/asap" className="bg-white/[0.06] border border-white/10 hover:bg-white/[0.1] text-white px-8 py-4 rounded-xl text-lg font-bold transition-all">
@@ -107,7 +107,7 @@ export default function LearnLandingPage() {
         <div className="bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm rounded-2xl p-10 md:p-16 text-center">
           <h3 className="text-2xl md:text-3xl font-bold mb-4">Ready to start your 12-week journey?</h3>
           <p className="text-[#b89d9f] mb-8 max-w-xl mx-auto">Join the next cohort and transform your career trajectory</p>
-          <Link href="/learn/enroll" className="inline-block bg-gradient-to-r from-[#CC2630] to-[#ea2a33] hover:opacity-90 text-white px-10 py-4 rounded-xl text-lg font-bold transition-all">
+          <Link href="/learn/asap/enroll" className="inline-block bg-gradient-to-r from-[#CC2630] to-[#ea2a33] hover:opacity-90 text-white px-10 py-4 rounded-xl text-lg font-bold transition-all">
             Enroll Now
           </Link>
         </div>
