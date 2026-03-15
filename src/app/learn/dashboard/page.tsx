@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import Link from 'next/link';
 import { useAuthContext } from '@/context/AuthContext';
@@ -39,8 +39,8 @@ const FEATURES: FeatureCard[] = [
     label: 'ASAP Program',
     description: '12-week intensive career accelerator for ambitious African students.',
     icon: BookOpen,
-    href: '/learn/coming-soon?feature=asap',
-    comingSoon: true,
+    href: '/learn',
+    comingSoon: false,
     accent: '#ea2a33',
   },
   {
