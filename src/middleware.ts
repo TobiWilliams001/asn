@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 const PROTECTED_PATHS = [
     '/learn/dashboard',
     '/learn/profile',
-    '/learn/enroll',
+    '/learn/asap/enroll',
     '/learn/asap/modules',
     '/onboarding',
 ];
