@@ -12,15 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       
-      - uses: pnpm/action-setup@v2  # Add PNPM
+      - uses: pnpm/action-setup@v2  
         with:
           version: 8
           
       - uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'pnpm'  # Change from 'npm' to 'pnpm'
+          cache: 'pnpm'  
           
-      - run: pnpm install  # Change from npm ci
+      - run: pnpm install 
       - run: pnpm run lint
       - run: pnpm run build
