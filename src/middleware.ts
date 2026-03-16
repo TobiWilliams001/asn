@@ -6,6 +6,7 @@ const PROTECTED_PATHS = [
     '/learn/profile',
     '/learn/asap/enroll',
     '/learn/asap/modules',
+    '/learn/asap/application-status',
     '/onboarding',
 ];
 
