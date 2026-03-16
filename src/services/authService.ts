@@ -27,6 +27,7 @@ export interface UserProfile {
   referralSource: string | null;
   role: 'free' | 'enrolled';
   bio?: string;
+  asapStatus?: 'none' | 'applicant' | 'enrolled';
   onboardingComplete?: boolean;
   createdAt: Date;
   updatedAt: Date;
