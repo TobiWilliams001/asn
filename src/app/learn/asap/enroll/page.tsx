@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Mail, Phone, MapPin, GraduationCap, FileText, Briefcase, Rocket, Building2, ChevronRight, ChevronLeft, CheckCircle, Loader2, Edit2, Lock } from 'lucide-react';
+import { User, Mail, Phone, MapPin, GraduationCap, FileText, Briefcase, Rocket, Building2, ChevronRight, ChevronLeft, CheckCircle, Loader2, Edit2, Lock, Award, Target, Lightbulb, AlertCircle, Check } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthContext } from '@/context/AuthContext';
 import { learnDb } from '@/firebase/learnConfig';
@@ -28,22 +28,22 @@ const TRACKS = [
     id: 'technology',
     icon: Briefcase,
     title: 'Technology & Digital Innovation',
-    description: 'Focus on software engineering, data science, and AI-driven solutions for African markets.',
+    description: 'Software engineering, data science, and AI-driven solutions for African markets',
     focus: 'Scale & Architecture'
   },
   {
     id: 'entrepreneurship',
     icon: Rocket,
     title: 'Entrepreneurship & Venture',
-    description: 'Designed for founders building sustainable businesses and social enterprises from the ground up.',
+    description: 'Building sustainable businesses and social enterprises from the ground up',
     focus: 'Operations & Funding'
   },
   {
     id: 'policy',
     icon: Building2,
     title: 'Public Policy & Governance',
-    description: 'For future leaders in civil service, non-profits, and systemic reform within the African context.',
-    focus: 'Ethics & Policy Design'
+    description: 'Leading systemic reform in civil service, non-profits, and policy design',
+    focus: 'Ethics & Impact'
   }
 ];
 
@@ -52,9 +52,22 @@ function EnrollContent() {
   const { user, userProfile } = useAuthContext();
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedStatement, setExpandedStatement] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  useEffect(() => {
+    // If user already applied, redirect to status page
+    if (userProfile?.asapStatus === 'applicant') {
+      router.push('/learn/asap/application-status');
+    }
+
+    // If user is already enrolled, redirect to modules
+    if (userProfile?.asapStatus === 'enrolled') {
+      router.push('/learn/asap/modules');
+    }
+  }, [userProfile, router]);
 
   const [formData, setFormData] = useState({
-    // Step 1: Personal Info
     fullName: userProfile?.fullName || user?.displayName || '',
     email: userProfile?.email || user?.email || '',
     phone: '',
@@ -62,14 +75,10 @@ function EnrollContent() {
     city: '',
     bio: userProfile?.bio || '',
     statementOfIntent: '',
-
-    // Step 2: Academic
     university: userProfile?.institution || '',
     degreeProgram: '',
     gpa: '',
     graduationYear: '',
-
-    // Step 3: Track
     track: '',
     trackJustification: '',
   });
@@ -83,7 +92,6 @@ function EnrollContent() {
     setIsSubmitting(true);
 
     try {
-      // Create application document
       const applicationRef = await addDoc(collection(learnDb, 'applications'), {
         userId: user.uid,
         status: 'pending',
@@ -113,7 +121,6 @@ function EnrollContent() {
         updatedAt: serverTimestamp(),
       });
 
-      // Update user profile
       const userRef = doc(learnDb, 'users', user.uid);
       await updateDoc(userRef, {
         asapApplicationId: applicationRef.id,
@@ -143,163 +150,292 @@ function EnrollContent() {
     if (currentStep === 3) {
       return formData.track && formData.trackJustification.split(' ').filter(Boolean).length >= 100;
     }
-    return true; // Step 4 (review) always allows proceed
+    return true;
   };
 
   const wordCount = (text: string) => text.trim().split(/\s+/).filter(Boolean).length;
-
   const getSelectedTrack = () => TRACKS.find(t => t.id === formData.track);
+  const progressPercentage = (currentStep / 4) * 100;
+
+  const STEP_INFO = [
+    { num: 1, label: 'Personal', icon: User },
+    { num: 2, label: 'Academic', icon: GraduationCap },
+    { num: 3, label: 'Track', icon: Target },
+    { num: 4, label: 'Review', icon: CheckCircle },
+  ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-[#0a0506] via-[#181111] to-[#0f0909] pb-16">
-      <div className="max-w-4xl mx-auto px-6 pt-8">
-        {/* Title */}
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-3 uppercase italic tracking-tight">
-            {currentStep === 1 && 'Step 1: Personal Details'}
-            {currentStep === 2 && 'Step 2: Academic Background'}
-            {currentStep === 3 && 'Step 3: Industry Track Selection'}
-            {currentStep === 4 && 'Step 4: Review & Submit'}
+    <div className="min-h-screen bg-gradient-to-b from-[#261c1c] to-[#181111] pb-16 relative overflow-hidden">
+      
+      {/* Subtle background blobs */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 bg-[#ea2a33]/6 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/3 -right-20 w-96 h-96 bg-[#CC2630]/4 rounded-full blur-3xl"></div>
+        <div className="absolute -bottom-32 left-1/3 w-96 h-96 bg-[#8b1625]/3 rounded-full blur-3xl"></div>
+      </div>
+
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pt-8 relative z-10">
+        
+        <div className="mb-8 text-center animate-in fade-in slide-in-from-top duration-700">
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#ea2a33]/10 border border-[#ea2a33]/20 rounded-full mb-4">
+            <Award size={14} className="text-[#ea2a33]" />
+            <span className="text-xs font-bold text-[#ea2a33] uppercase tracking-wider">12-Week Intensive Program</span>
+          </div>
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-black text-white mb-3 tracking-tight">
+            ASAP Enrollment Application
           </h1>
-          <p className="text-[#b89d9f] text-base max-w-2xl">
-            {currentStep === 1 && 'Begin your journey with the African Student Accelerator Program. We require detailed information to verify eligibility.'}
-            {currentStep === 2 && 'Provide detailed academic history. The ASAP program is highly selective; academic rigor is a core evaluation criterion.'}
-            {currentStep === 3 && 'Your choice determines your mentors, curriculum modules, and final impact project parameters.'}
-            {currentStep === 4 && 'Please review your information carefully. Your responses are final once submitted.'}
+          <p className="text-[#b89d9f] text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+            Join Africa&apos;s next generation of leaders and changemakers
           </p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="bg-[#261c1c] p-6 rounded-2xl border border-[#382929] mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-xs font-bold uppercase tracking-widest text-[#b89d9f]">Enrollment Progress</span>
-            <span className="text-sm font-bold text-white">Step {currentStep} of 4</span>
+        {/* Step Indicator */}
+        <div className="mb-8 animate-in fade-in slide-in-from-top duration-700 delay-150">
+          <div className="flex items-center justify-between mb-6">
+            {STEP_INFO.map((step, index) => {
+              const StepIcon = step.icon;
+              const isActive = currentStep === step.num;
+              const isCompleted = currentStep > step.num;
+              
+              return (
+                <div key={step.num} className="flex items-center flex-1">
+                  <div className="flex flex-col items-center flex-1">
+                    <div className={`relative w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all duration-300 ${
+                      isCompleted ? 'bg-white/10 border-2 border-white/30' :
+                      isActive ? 'bg-gradient-to-r from-[#CC2630] to-[#ea2a33] border-2 border-[#ea2a33] shadow-lg shadow-[#ea2a33]/30 scale-110' :
+                      'bg-white/[0.04] border-2 border-white/[0.06]'
+                    }`}>
+                      {isCompleted ? (
+                        <Check size={20} className="text-white" strokeWidth={3} />
+                      ) : (
+                        <StepIcon size={18} className={isActive ? 'text-white' : 'text-[#b89d9f]'} />
+                      )}
+                      {isActive && (
+                        <div className="absolute inset-0 rounded-full bg-[#ea2a33] opacity-20 animate-ping" />
+                      )}
+                    </div>
+                    <span className={`text-xs sm:text-sm font-bold mt-2 transition-colors ${
+                      isActive ? 'text-white' : 'text-[#b89d9f]'
+                    }`}>
+                      {step.label}
+                    </span>
+                  </div>
+                  {index < STEP_INFO.length - 1 && (
+                    <div className="flex-1 h-0.5 mx-2 mb-8">
+                      <div className={`h-full transition-all duration-500 ${
+                        currentStep > step.num ? 'bg-white/30' : 'bg-white/[0.06]'
+                      }`} />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-          <div className="h-2 w-full bg-[#1a0505] rounded-full overflow-hidden">
+
+          <div className="h-1 w-full bg-white/[0.04] rounded-full overflow-hidden">
             <div 
-              className="h-full bg-gradient-to-r from-[#CC2630] to-[#ea2a33] transition-all duration-500" 
-              style={{ width: `${(currentStep / 4) * 100}%` }}
+              className="h-full bg-gradient-to-r from-[#CC2630] to-[#ea2a33] transition-all duration-700 ease-out" 
+              style={{ width: `${progressPercentage}%` }}
             />
-          </div>
-          <div className="flex justify-between mt-3 px-1">
-            <span className={`text-[10px] ${currentStep === 1 ? 'text-white font-bold' : 'text-[#b89d9f] opacity-40'}`}>Personal</span>
-            <span className={`text-[10px] ${currentStep === 2 ? 'text-white font-bold' : 'text-[#b89d9f] opacity-40'}`}>Academic</span>
-            <span className={`text-[10px] ${currentStep === 3 ? 'text-white font-bold' : 'text-[#b89d9f] opacity-40'}`}>Track</span>
-            <span className={`text-[10px] ${currentStep === 4 ? 'text-white font-bold' : 'text-[#b89d9f] opacity-40'}`}>Review</span>
           </div>
         </div>
 
-        {/* Form Card */}
-        <div className="bg-[#261c1c] rounded-2xl border border-[#382929] overflow-hidden">
+        <div className={`bg-white/[0.04] border border-white/[0.06] backdrop-blur-sm rounded-3xl overflow-hidden shadow-2xl animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300 ${
+          isSubmitting ? 'pointer-events-none opacity-60' : ''
+        }`}>
+          
           {/* Step 1: Personal Info */}
           {currentStep === 1 && (
             <>
-              <div className="p-8 border-b border-[#382929] bg-gradient-to-r from-[#2d2222] to-[#261c1c]">
-                <div className="flex items-center gap-3 mb-2">
-                  <User size={24} className="text-[#ea2a33]" />
-                  <h3 className="text-xl font-bold text-white">Identity & Identification</h3>
-                </div>
-                <p className="text-sm text-[#b89d9f]">Ensure your details match your official legal documentation.</p>
-              </div>
-              <div className="p-8 space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-6 sm:p-8 border-b border-white/[0.06]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] flex items-center justify-center shadow-lg">
+                    <User size={22} className="text-white" />
+                  </div>
                   <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2 block">Full Legal Name</label>
+                    <h3 className="text-lg sm:text-xl font-black text-white">Personal Information</h3>
+                    <p className="text-xs sm:text-sm text-[#b89d9f]">Tell us about yourself</p>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 sm:p-8 space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="group">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
+                      Full Legal Name
+                      {formData.fullName && <Check size={14} className="text-white/40" />}
+                    </label>
                     <input
                       type="text"
                       name="fullName"
                       value={formData.fullName}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                      onFocus={() => setFocusedField('fullName')}
+                      onBlur={() => setFocusedField(null)}
+                      autoComplete="name"
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'fullName' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.fullName ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       placeholder="As it appears on ID"
                       required
                     />
                   </div>
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2 block">Primary Email</label>
+
+                  <div className="group">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
+                      Email Address
+                      {formData.email && <Check size={14} className="text-white/40" />}
+                    </label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                      onFocus={() => setFocusedField('email')}
+                      onBlur={() => setFocusedField(null)}
+                      autoComplete="email"
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'email' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.email ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       placeholder="name@example.com"
                       required
                     />
                   </div>
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2 block">Contact Number</label>
+
+                  <div className="group">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
+                      Phone Number
+                      {formData.phone && <Check size={14} className="text-white/40" />}
+                    </label>
                     <input
                       type="tel"
                       name="phone"
                       value={formData.phone}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                      onFocus={() => setFocusedField('phone')}
+                      onBlur={() => setFocusedField(null)}
+                      autoComplete="tel"
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'phone' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.phone ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       placeholder="+234 ..."
                       required
                     />
                   </div>
-                  <div>
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2 block">Country of Residence</label>
+
+                  <div className="group">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
+                      Country
+                      {formData.country && <Check size={14} className="text-white/40" />}
+                    </label>
                     <select
                       name="country"
                       value={formData.country}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all appearance-none cursor-pointer"
+                      onFocus={() => setFocusedField('country')}
+                      onBlur={() => setFocusedField(null)}
+                      autoComplete="country-name"
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white focus:outline-none appearance-none cursor-pointer ${
+                        focusedField === 'country' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.country ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       required
                     >
-                      <option value="">Select Country</option>
+                      <option value="" className="bg-[#0f0a0b]">Select Country</option>
                       {COUNTRIES.map(c => (
-                        <option key={c} value={c}>{c}</option>
+                        <option key={c} value={c} className="bg-[#0f0a0b] text-white">{c}</option>
                       ))}
                     </select>
                   </div>
-                  <div className="md:col-span-2">
-                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2 block">City / Region</label>
+
+                  <div className="md:col-span-2 group">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
+                      City / Region
+                      {formData.city && <Check size={14} className="text-white/40" />}
+                    </label>
                     <input
                       type="text"
                       name="city"
                       value={formData.city}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                      onFocus={() => setFocusedField('city')}
+                      onBlur={() => setFocusedField(null)}
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'city' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.city ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       placeholder="e.g. Lagos, Nairobi, Johannesburg"
                       required
                     />
                   </div>
                 </div>
 
-                <div className="space-y-4 pt-6 border-t border-[#382929]">
-                  <div className="flex items-center justify-between">
-                    <label className="text-lg font-bold text-white">Statement of Intent</label>
-                    <div className="flex items-center gap-2 text-xs text-[#b89d9f]">
-                      <FileText size={14} className="text-[#ea2a33]" />
-                      Word count: <span className="font-bold text-white">{wordCount(formData.statementOfIntent)}</span> / 500
-                    </div>
-                  </div>
-                  <p className="text-sm text-[#b89d9f] italic">How will the ASAP program help you drive social or economic impact in your community?</p>
-                  <textarea
-                    name="statementOfIntent"
-                    value={formData.statementOfIntent}
-                    onChange={handleChange}
-                    className="w-full rounded-xl p-6 text-base leading-relaxed bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all resize-y min-h-[250px]"
-                    placeholder="Clearly articulate your vision and the specific social or economic levers you intend to move..."
-                    rows={8}
-                    required
-                  />
-                  <p className="text-[10px] uppercase tracking-wide text-[#b89d9f]/60 text-right">Minimum 250 words recommended</p>
-                </div>
-
-                <div className="space-y-2 pt-6 border-t border-[#382929]">
-                  <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2 block">Brief Professional Bio</label>
+                <div className="space-y-3 pt-6 border-t border-white/[0.06]">
+                  <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] flex items-center gap-2">
+                    Brief Bio (2-3 sentences)
+                    {formData.bio && <Check size={14} className="text-white/40" />}
+                  </label>
                   <textarea
                     name="bio"
                     value={formData.bio}
                     onChange={handleChange}
-                    className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all resize-none"
-                    placeholder="A 2-3 sentence summary of your background and achievements."
+                    onFocus={() => setFocusedField('bio')}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none resize-none ${
+                      focusedField === 'bio' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                      formData.bio ? 'border-white/20' : 'border-white/[0.06]'
+                    }`}
+                    placeholder="A concise summary of your background, achievements, and current focus..."
                     rows={3}
                     required
                   />
+                </div>
+
+                <div className="space-y-4 pt-6 border-t border-white/[0.06]">
+                  <div className="flex items-center justify-between">
+                    <label className="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                      Statement of Intent
+                      {wordCount(formData.statementOfIntent) >= 250 && (
+                        <CheckCircle size={18} className="text-white/40" />
+                      )}
+                    </label>
+                    <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                      wordCount(formData.statementOfIntent) >= 250 ? 'bg-white/10 border border-white/20' : 'bg-white/[0.04] border border-white/[0.06]'
+                    }`}>
+                      <FileText size={14} className="text-[#ea2a33]" />
+                      <span className={`text-xs font-bold ${wordCount(formData.statementOfIntent) >= 250 ? 'text-white' : 'text-[#b89d9f]'}`}>
+                        {wordCount(formData.statementOfIntent)} / 500
+                      </span>
+                    </div>
+                  </div>
+                  <p className="text-xs sm:text-sm text-[#b89d9f] italic flex items-start gap-2">
+                    <Lightbulb size={14} className="flex-shrink-0 mt-0.5 text-[#ea2a33]" />
+                    How will the ASAP program help you drive social or economic impact in your community?
+                  </p>
+                  <textarea
+                    name="statementOfIntent"
+                    value={formData.statementOfIntent}
+                    onChange={handleChange}
+                    onFocus={() => setFocusedField('statement')}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full rounded-xl p-5 sm:p-6 text-sm sm:text-base leading-relaxed bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none resize-y min-h-[250px] ${
+                      focusedField === 'statement' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                      wordCount(formData.statementOfIntent) >= 250 ? 'border-white/20' : 'border-white/[0.06]'
+                    }`}
+                    placeholder="Share your vision, the specific challenges you want to address, and how ASAP will help you create lasting impact..."
+                    rows={8}
+                    required
+                  />
+                  {wordCount(formData.statementOfIntent) < 250 && (
+                    <p className="text-xs text-[#b89d9f]/60 flex items-center gap-2">
+                      <AlertCircle size={12} />
+                      Minimum 250 words required • {250 - wordCount(formData.statementOfIntent)} words remaining
+                    </p>
+                  )}
                 </div>
               </div>
             </>
@@ -308,61 +444,102 @@ function EnrollContent() {
           {/* Step 2: Academic Background */}
           {currentStep === 2 && (
             <>
-              <div className="p-8 border-b border-[#382929] bg-gradient-to-r from-[#2d2222] to-[#261c1c]">
-                <div className="flex items-center gap-3 mb-2">
-                  <GraduationCap size={24} className="text-[#ea2a33]" />
-                  <h3 className="text-xl font-bold text-white">Educational History</h3>
+              <div className="p-6 sm:p-8 border-b border-white/[0.06]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] flex items-center justify-center shadow-lg">
+                    <GraduationCap size={22} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-black text-white">Academic Background</h3>
+                    <p className="text-xs sm:text-sm text-[#b89d9f]">Your educational journey</p>
+                  </div>
                 </div>
-                <p className="text-sm text-[#b89d9f]">Enter details of your most recent or ongoing higher education institution.</p>
               </div>
-              <div className="p-8 space-y-6">
-                <div>
-                  <label className="block text-sm font-bold text-[#EEB7BA] mb-2">University / Higher Institution Name</label>
+              
+              <div className="p-6 sm:p-8 space-y-6">
+                <div className="group">
+                  <label className="block text-sm font-bold text-[#EEB7BA] mb-2.5 flex items-center gap-2">
+                    University / Institution
+                    {formData.university && <Check size={14} className="text-white/40" />}
+                  </label>
                   <input
                     type="text"
                     name="university"
                     value={formData.university}
                     onChange={handleChange}
-                    className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                    onFocus={() => setFocusedField('university')}
+                    onBlur={() => setFocusedField(null)}
+                    autoComplete="organization"
+                    className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                      focusedField === 'university' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                      formData.university ? 'border-white/20' : 'border-white/[0.06]'
+                    }`}
                     placeholder="e.g. University of Cape Town"
                     required
                   />
                 </div>
-                <div>
-                  <label className="block text-sm font-bold text-[#EEB7BA] mb-2">Degree Program & Major</label>
+
+                <div className="group">
+                  <label className="block text-sm font-bold text-[#EEB7BA] mb-2.5 flex items-center gap-2">
+                    Degree Program & Major
+                    {formData.degreeProgram && <Check size={14} className="text-white/40" />}
+                  </label>
                   <input
                     type="text"
                     name="degreeProgram"
                     value={formData.degreeProgram}
                     onChange={handleChange}
-                    className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                    onFocus={() => setFocusedField('degree')}
+                    onBlur={() => setFocusedField(null)}
+                    className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                      focusedField === 'degree' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                      formData.degreeProgram ? 'border-white/20' : 'border-white/[0.06]'
+                    }`}
                     placeholder="e.g. B.Sc. Computer Science"
                     required
                   />
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-bold text-[#EEB7BA] mb-2">Year of Graduation (Expected)</label>
+                  <div className="group">
+                    <label className="block text-sm font-bold text-[#EEB7BA] mb-2.5 flex items-center gap-2">
+                      Expected Graduation
+                      {formData.graduationYear && <Check size={14} className="text-white/40" />}
+                    </label>
                     <input
                       type="number"
                       name="graduationYear"
                       value={formData.graduationYear}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                      onFocus={() => setFocusedField('gradYear')}
+                      onBlur={() => setFocusedField(null)}
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'gradYear' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.graduationYear ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       placeholder="YYYY"
                       min="2000"
                       max="2030"
                       required
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-bold text-[#EEB7BA] mb-2">Current GPA / Final Grade</label>
+
+                  <div className="group">
+                    <label className="block text-sm font-bold text-[#EEB7BA] mb-2.5 flex items-center gap-2">
+                      Current GPA / Grade
+                      {formData.gpa && <Check size={14} className="text-white/40" />}
+                    </label>
                     <input
                       type="text"
                       name="gpa"
                       value={formData.gpa}
                       onChange={handleChange}
-                      className="w-full rounded-xl px-4 py-3.5 text-sm bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all"
+                      onFocus={() => setFocusedField('gpa')}
+                      onBlur={() => setFocusedField(null)}
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'gpa' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.gpa ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
                       placeholder="e.g. 3.8/4.0 or First Class"
                       required
                     />
@@ -375,21 +552,26 @@ function EnrollContent() {
           {/* Step 3: Track Selection */}
           {currentStep === 3 && (
             <>
-              <div className="p-8 border-b border-[#382929] bg-gradient-to-r from-[#2d2222] to-[#261c1c]">
-                <div className="flex items-center gap-3 mb-2">
-                  <Rocket size={24} className="text-[#ea2a33]" />
-                  <h3 className="text-xl font-bold text-white">Choose Your Core Track</h3>
+              <div className="p-6 sm:p-8 border-b border-white/[0.06]">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] flex items-center justify-center shadow-lg">
+                    <Target size={22} className="text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg sm:text-xl font-black text-white">Choose Your Track</h3>
+                    <p className="text-xs sm:text-sm text-[#b89d9f]">Select your impact focus area</p>
+                  </div>
                 </div>
-                <p className="text-sm text-[#b89d9f]">Select the industry track where you intend to drive your social or economic impact.</p>
               </div>
-              <div className="p-8 space-y-10">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              
+              <div className="p-6 sm:p-8 space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                   {TRACKS.map((track) => {
                     const Icon = track.icon;
                     const isSelected = formData.track === track.id;
                     
                     return (
-                      <label key={track.id} className="cursor-pointer">
+                      <label key={track.id} className="cursor-pointer group">
                         <input
                           type="radio"
                           name="track"
@@ -398,55 +580,81 @@ function EnrollContent() {
                           onChange={handleChange}
                           className="hidden"
                         />
-                        <div className={`p-6 rounded-2xl flex flex-col h-full border-2 transition-all duration-300 ${
+                        <div className={`relative p-6 rounded-2xl flex flex-col min-h-[300px] border-2 transition-all duration-300 ${
                           isSelected
-                            ? 'border-[#ea2a33] bg-[#ea2a33]/10 shadow-lg shadow-[#ea2a33]/20 scale-[1.02]'
-                            : 'border-[#382929] bg-[#1a1314] hover:border-[#533c3d] hover:bg-[#1f1818]'
+                            ? 'border-[#ea2a33] bg-[#ea2a33]/5 shadow-xl shadow-[#ea2a33]/20 scale-[1.02]'
+                            : 'border-white/[0.06] bg-[#0f0a0b] hover:border-white/20 hover:bg-white/[0.04]'
                         }`}>
-                          <Icon size={32} className={`mb-4 ${isSelected ? 'text-[#ea2a33]' : 'text-[#b89d9f]'}`} />
-                          <h4 className="text-lg font-bold mb-2 text-white">{track.title}</h4>
-                          <p className="text-xs text-[#b89d9f] leading-relaxed mb-6 flex-1">{track.description}</p>
-                          <div className="pt-4 border-t border-[#382929]">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-[#b89d9f]/60">
-                              Focus: {track.focus}
-                            </span>
+                          
+                          <div className={`w-14 h-14 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center mb-4 border border-[#ea2a33]/20 ${isSelected ? 'scale-110' : 'group-hover:scale-105'} transition-transform`}>
+                            <Icon size={26} className={isSelected ? 'text-[#ea2a33]' : 'text-[#b89d9f]'} />
                           </div>
-                          {isSelected && (
-                            <div className="mt-4 flex justify-end">
-                              <CheckCircle size={24} className="text-[#ea2a33]" />
+
+                          <h4 className="text-base sm:text-lg font-bold mb-2.5 text-white leading-tight">{track.title}</h4>
+                          <p className="text-xs sm:text-sm text-[#b89d9f] leading-relaxed mb-auto">{track.description}</p>
+                          
+                          <div className="pt-4 mt-4 border-t border-white/[0.06]">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-bold uppercase tracking-wider text-[#b89d9f]/60">
+                                Focus: {track.focus}
+                              </span>
+                              {isSelected && (
+                                <CheckCircle size={22} className="text-[#ea2a33]" />
+                              )}
                             </div>
-                          )}
+                          </div>
                         </div>
                       </label>
                     );
                   })}
                 </div>
 
-                <div className="space-y-4 pt-6 border-t border-[#382929]">
-                  <label className="block">
-                    <span className="text-lg font-bold text-white block mb-2">
-                      Why are you choosing this specific track?
-                    </span>
-                    <p className="text-xs text-[#b89d9f] mb-4 italic">
-                      Detail your previous experience and how this track aligns with your long-term vision.
-                    </p>
-                    <textarea
-                      name="trackJustification"
-                      value={formData.trackJustification}
-                      onChange={handleChange}
-                      className="w-full rounded-xl p-6 text-base leading-relaxed bg-[#1a1314] border border-[#382929] text-white placeholder-[#b89d9f]/50 focus:border-[#ea2a33] focus:ring-2 focus:ring-[#ea2a33]/20 focus:outline-none transition-all resize-y min-h-[200px]"
-                      placeholder="Briefly justify your selection..."
-                      rows={6}
-                      required
-                    />
-                  </label>
-                  <div className="flex items-center justify-between px-2">
-                    <div className="flex items-center gap-2 text-sm text-[#b89d9f]">
-                      <FileText size={16} className="text-[#ea2a33]" />
-                      Word count: <span className="font-bold text-white">{wordCount(formData.trackJustification)}</span> / 300
+                {formData.track && (
+                  <div className="space-y-4 pt-6 border-t border-white/[0.06] animate-in fade-in slide-in-from-bottom-4 duration-500">
+                    <label className="block">
+                      <span className="text-base sm:text-lg font-bold text-white block mb-2 flex items-center gap-2">
+                        Why this track?
+                        {wordCount(formData.trackJustification) >= 100 && (
+                          <CheckCircle size={18} className="text-white/40" />
+                        )}
+                      </span>
+                      <p className="text-xs text-[#b89d9f] mb-4 italic flex items-start gap-2">
+                        <Lightbulb size={14} className="flex-shrink-0 mt-0.5 text-[#ea2a33]" />
+                        Detail your experience and how this track aligns with your vision
+                      </p>
+                      <textarea
+                        name="trackJustification"
+                        value={formData.trackJustification}
+                        onChange={handleChange}
+                        onFocus={() => setFocusedField('trackJust')}
+                        onBlur={() => setFocusedField(null)}
+                        className={`w-full rounded-xl p-5 sm:p-6 text-sm sm:text-base leading-relaxed bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none resize-y min-h-[200px] ${
+                          focusedField === 'trackJust' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                          wordCount(formData.trackJustification) >= 100 ? 'border-white/20' : 'border-white/[0.06]'
+                        }`}
+                        placeholder="Share your relevant experience and long-term vision..."
+                        rows={6}
+                        required
+                      />
+                    </label>
+                    <div className="flex items-center justify-between px-2">
+                      <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${
+                        wordCount(formData.trackJustification) >= 100 ? 'bg-white/10 border border-white/20' : 'bg-white/[0.04] border border-white/[0.06]'
+                      }`}>
+                        <FileText size={14} className="text-[#ea2a33]" />
+                        <span className={`text-xs font-bold ${wordCount(formData.trackJustification) >= 100 ? 'text-white' : 'text-[#b89d9f]'}`}>
+                          {wordCount(formData.trackJustification)} / 300
+                        </span>
+                      </div>
+                      {wordCount(formData.trackJustification) < 100 && (
+                        <p className="text-xs text-[#b89d9f]/60 flex items-center gap-2">
+                          <AlertCircle size={12} />
+                          {100 - wordCount(formData.trackJustification)} words remaining
+                        </p>
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
               </div>
             </>
           )}
@@ -454,11 +662,16 @@ function EnrollContent() {
           {/* Step 4: Review & Submit */}
           {currentStep === 4 && (
             <>
-              <div className="p-8 border-b border-[#382929] bg-gradient-to-r from-[#2d2222] to-[#261c1c]">
-                <div className="flex items-center justify-between">
+              <div className="p-6 sm:p-8 border-b border-white/[0.06]">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <CheckCircle size={24} className="text-[#ea2a33]" />
-                    <h3 className="text-xl font-bold text-white">Application Summary</h3>
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] flex items-center justify-center shadow-lg">
+                      <CheckCircle size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="text-lg sm:text-xl font-black text-white">Review & Submit</h3>
+                      <p className="text-xs sm:text-sm text-[#b89d9f]">Verify your information</p>
+                    </div>
                   </div>
                   <div className="flex items-center gap-2 text-xs text-[#b89d9f]">
                     <Lock size={14} />
@@ -467,142 +680,163 @@ function EnrollContent() {
                 </div>
               </div>
 
-              <div className="divide-y divide-[#382929]">
-                {/* Personal Info Review */}
-                <div className="p-8">
+              <div className="divide-y divide-white/[0.06]">
+                
+                <div className="p-6 sm:p-8">
                   <div className="flex justify-between items-start mb-6">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-[#ea2a33]">01. Personal Information</h4>
+                    <h4 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#ea2a33]">01. Personal Information</h4>
                     <button 
                       onClick={() => setCurrentStep(1)}
-                      className="flex items-center gap-1 text-xs font-semibold text-[#b89d9f] hover:text-white transition-all"
+                      className="flex items-center gap-1 text-xs font-semibold text-[#b89d9f] hover:text-white transition-all group"
                     >
-                      <Edit2 size={14} /> EDIT
+                      <Edit2 size={14} className="group-hover:scale-110 transition-transform" /> EDIT
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Full Name</p>
-                      <p className="text-sm font-medium text-white">{formData.fullName}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Full Name</p>
+                      <p className="text-sm font-semibold text-white">{formData.fullName}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Email</p>
-                      <p className="text-sm font-medium text-white">{formData.email}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Email</p>
+                      <p className="text-sm font-semibold text-white">{formData.email}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Country</p>
-                      <p className="text-sm font-medium text-white">{formData.country}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Country</p>
+                      <p className="text-sm font-semibold text-white">{formData.country}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Phone</p>
-                      <p className="text-sm font-medium text-white">{formData.phone}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Phone</p>
+                      <p className="text-sm font-semibold text-white">{formData.phone}</p>
                     </div>
                     <div className="md:col-span-2">
-                      <p className="text-xs text-[#b89d9f] mb-2 uppercase font-semibold">Statement of Intent ({wordCount(formData.statementOfIntent)} words)</p>
-                      <div className="p-4 rounded-xl bg-[#1a1314] border border-[#382929]">
-                        <p className="text-sm leading-relaxed text-white line-clamp-3">{formData.statementOfIntent}</p>
+                      <p className="text-xs text-[#b89d9f] mb-2.5 uppercase font-semibold flex items-center gap-2">
+                        Statement of Intent 
+                        <span className="px-2 py-0.5 rounded-full bg-white/10 text-white text-[10px] font-bold">
+                          {wordCount(formData.statementOfIntent)} words
+                        </span>
+                      </p>
+                      <div className="p-4 sm:p-5 rounded-xl bg-[#0f0a0b] border border-white/[0.06]">
+                        <p className={`text-sm leading-relaxed text-white ${expandedStatement ? '' : 'line-clamp-4'}`}>
+                          {formData.statementOfIntent}
+                        </p>
+                        {formData.statementOfIntent.length > 200 && (
+                          <button 
+                            onClick={() => setExpandedStatement(!expandedStatement)}
+                            className="text-xs text-[#ea2a33] mt-3 hover:underline font-semibold flex items-center gap-1"
+                          >
+                            {expandedStatement ? (
+                              <><ChevronLeft size={12} /> Show Less</>
+                            ) : (
+                              <>Read Full Statement <ChevronRight size={12} /></>
+                            )}
+                          </button>
+                        )}
                       </div>
                     </div>
                   </div>
                 </div>
 
-                {/* Academic Review */}
-                <div className="p-8">
+                <div className="p-6 sm:p-8">
                   <div className="flex justify-between items-start mb-6">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-[#ea2a33]">02. Academic Background</h4>
+                    <h4 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#ea2a33]">02. Academic Background</h4>
                     <button 
                       onClick={() => setCurrentStep(2)}
-                      className="flex items-center gap-1 text-xs font-semibold text-[#b89d9f] hover:text-white transition-all"
+                      className="flex items-center gap-1 text-xs font-semibold text-[#b89d9f] hover:text-white transition-all group"
                     >
-                      <Edit2 size={14} /> EDIT
+                      <Edit2 size={14} className="group-hover:scale-110 transition-transform" /> EDIT
                     </button>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Institution</p>
-                      <p className="text-sm font-medium text-white">{formData.university}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Institution</p>
+                      <p className="text-sm font-semibold text-white">{formData.university}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Degree Program</p>
-                      <p className="text-sm font-medium text-white">{formData.degreeProgram}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Degree Program</p>
+                      <p className="text-sm font-semibold text-white">{formData.degreeProgram}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">GPA / Grade</p>
-                      <p className="text-sm font-medium text-white">{formData.gpa}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">GPA / Grade</p>
+                      <p className="text-sm font-semibold text-white">{formData.gpa}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1 uppercase font-semibold">Expected Graduation</p>
-                      <p className="text-sm font-medium text-white">{formData.graduationYear}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Expected Graduation</p>
+                      <p className="text-sm font-semibold text-white">{formData.graduationYear}</p>
                     </div>
                   </div>
                 </div>
 
-                {/* Track Review */}
-                <div className="p-8">
+                <div className="p-6 sm:p-8">
                   <div className="flex justify-between items-start mb-6">
-                    <h4 className="text-sm font-bold uppercase tracking-widest text-[#ea2a33]">03. Program Track</h4>
+                    <h4 className="text-xs sm:text-sm font-bold uppercase tracking-widest text-[#ea2a33]">03. Program Track</h4>
                     <button 
                       onClick={() => setCurrentStep(3)}
-                      className="flex items-center gap-1 text-xs font-semibold text-[#b89d9f] hover:text-white transition-all"
+                      className="flex items-center gap-1 text-xs font-semibold text-[#b89d9f] hover:text-white transition-all group"
                     >
-                      <Edit2 size={14} /> EDIT
+                      <Edit2 size={14} className="group-hover:scale-110 transition-transform" /> EDIT
                     </button>
                   </div>
-                  {getSelectedTrack() && (
-                    <div className="p-5 rounded-2xl bg-[#ea2a33]/10 border-2 border-[#ea2a33] flex items-center gap-4">
-                      {React.createElement(getSelectedTrack()!.icon, { size: 28, className: "text-[#ea2a33]" })}
-                      <div className="flex-1">
-                        <p className="text-base font-bold text-white">{getSelectedTrack()!.title}</p>
-                        <p className="text-xs text-[#b89d9f] mt-1">Focus: {getSelectedTrack()!.focus}</p>
+                  {getSelectedTrack() && (() => {
+                    const SelectedIcon = getSelectedTrack()!.icon;
+                    const selectedTrack = getSelectedTrack()!;
+                    return (
+                      <div className="p-5 rounded-2xl bg-[#ea2a33]/5 border-2 border-[#ea2a33] flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] flex items-center justify-center shadow-lg flex-shrink-0">
+                          <SelectedIcon size={22} className="text-white" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm sm:text-base font-bold text-white mb-1">{selectedTrack.title}</p>
+                          <p className="text-xs text-[#b89d9f]">Focus: {selectedTrack.focus}</p>
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    );
+                  })()}
                 </div>
               </div>
 
-              {/* Terms & Submit */}
-              <div className="px-8 py-8 bg-[#0f0a0b] border-t border-[#382929]">
-                <label className="flex gap-4 cursor-pointer group mb-8">
+              <div className="px-6 sm:px-8 py-8 bg-[#0f0a0b] border-t border-white/[0.06]">
+                <label className="flex gap-3 sm:gap-4 cursor-pointer group">
                   <input 
                     type="checkbox" 
-                    className="mt-1 w-4 h-4 rounded border-[#382929] bg-transparent text-[#ea2a33] focus:ring-[#ea2a33] focus:ring-offset-0"
+                    className="mt-1 w-5 h-5 rounded-lg border-2 border-white/10 bg-transparent text-[#ea2a33] focus:ring-[#ea2a33] focus:ring-offset-0 flex-shrink-0 cursor-pointer transition-all"
                     required
                   />
-                  <span className="text-xs leading-relaxed text-[#b89d9f] group-hover:text-white transition-colors">
-                    I hereby certify that all information provided in this application is accurate and true to the best of my knowledge. I understand that any misrepresentation may lead to immediate disqualification from the African Student Accelerator Program.
+                  <span className="text-xs sm:text-sm leading-relaxed text-[#b89d9f] group-hover:text-white transition-colors">
+                    I certify that all information provided is accurate and true. I understand that misrepresentation may lead to immediate disqualification from the African Student Accelerator Program.
                   </span>
                 </label>
               </div>
             </>
           )}
 
-          {/* Footer Navigation */}
-          <div className="px-8 py-6 bg-[#0f0a0b] flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-[#382929]">
-            <div className="flex items-center gap-2 text-[#b89d9f]">
+          <div className="px-6 sm:px-8 py-5 sm:py-6 bg-[#0f0a0b] flex flex-col sm:flex-row gap-4 items-center justify-between border-t border-white/[0.06]">
+            <div className="flex items-center gap-2 text-[#b89d9f] text-xs">
               <Lock size={14} />
-              <span className="text-[10px] uppercase font-bold tracking-widest">End-to-End Encrypted</span>
+              <span className="uppercase font-bold tracking-widest">Secured Application</span>
             </div>
-            <div className="flex gap-4 w-full sm:w-auto">
+            <div className="flex gap-3 sm:gap-4 w-full sm:w-auto">
               {currentStep > 1 && (
                 <button
                   onClick={() => setCurrentStep(currentStep - 1)}
-                  className="flex-1 sm:flex-none px-8 py-3 rounded-xl border-2 border-[#382929] text-sm font-bold text-white hover:bg-[#1f1818] hover:border-[#533c3d] transition-all flex items-center justify-center gap-2"
+                  className="flex-1 sm:flex-initial px-6 sm:px-8 py-3.5 rounded-xl border-2 border-white/10 text-sm font-bold text-white hover:bg-white/5 hover:border-white/20 transition-all flex items-center justify-center gap-2 group"
                 >
-                  <ChevronLeft size={18} /> Back
+                  <ChevronLeft size={18} className="group-hover:-translate-x-1 transition-transform" /> Back
                 </button>
               )}
               {currentStep < 4 ? (
                 <button
                   onClick={() => setCurrentStep(currentStep + 1)}
                   disabled={!canProceed()}
-                  className="flex-1 sm:flex-none px-10 py-3.5 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white text-sm font-bold tracking-wide hover:shadow-lg hover:shadow-[#ea2a33]/30 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 sm:flex-initial px-8 sm:px-12 py-4 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white text-sm font-black tracking-wide hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 group uppercase"
                 >
-                  Save & Continue <ChevronRight size={18} />
+                  Continue <ChevronRight size={18} className="group-hover:translate-x-1 transition-transform" />
                 </button>
               ) : (
                 <button
                   onClick={handleSubmit}
                   disabled={isSubmitting}
-                  className="flex-1 sm:flex-none px-12 py-4 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white text-base font-black tracking-wide hover:shadow-2xl hover:shadow-[#ea2a33]/40 active:scale-[0.98] transition-all shadow-xl shadow-[#ea2a33]/20 uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  className="flex-1 sm:flex-initial px-10 sm:px-14 py-4 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white text-sm sm:text-base font-black tracking-wide hover:opacity-90 active:scale-[0.98] transition-all uppercase disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2.5"
                 >
                   {isSubmitting ? (
                     <>
@@ -610,27 +844,14 @@ function EnrollContent() {
                       Submitting...
                     </>
                   ) : (
-                    'Submit Application'
+                    <>
+                      <CheckCircle size={20} />
+                      Submit Application
+                    </>
                   )}
                 </button>
               )}
             </div>
-          </div>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="flex flex-wrap justify-center items-center gap-8 opacity-20 mt-8 grayscale">
-          <div className="flex items-center gap-2">
-            <CheckCircle size={16} className="text-white" />
-            <span className="text-xs font-bold uppercase tracking-wider text-white">Verified Identity</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <MapPin size={16} className="text-white" />
-            <span className="text-xs font-bold uppercase tracking-wider text-white">Pan-African Network</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <GraduationCap size={16} className="text-white" />
-            <span className="text-xs font-bold uppercase tracking-wider text-white">Elite Selection</span>
           </div>
         </div>
       </div>
