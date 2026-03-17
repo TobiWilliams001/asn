@@ -175,8 +175,8 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
                 <Link
                   href="/learn/dashboard"
                   className={`flex items-center gap-3 px-3 py-2.5 xl:py-3 rounded-lg text-sm font-medium transition-all group ${isActive('/learn/dashboard')
-                      ? 'bg-white/10 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-white/10'
+                    ? 'bg-white/10 text-white'
+                    : 'text-gray-400 hover:text-white hover:bg-white/10'
                     }`}
                   title={!sidebarOpen ? 'Dashboard' : ''}
                 >
@@ -195,8 +195,8 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
                       key={link.label}
                       href={link.href}
                       className={`flex items-start gap-3 px-3 py-2.5 xl:py-3 rounded-lg text-sm font-medium transition-all group ${isActive(link.href)
-                          ? 'bg-white/10 text-white'
-                          : 'text-gray-400 hover:text-white hover:bg-white/10'
+                        ? 'bg-white/10 text-white'
+                        : 'text-gray-400 hover:text-white hover:bg-white/10'
                         }`}
                       title={!sidebarOpen ? link.label : ''}
                     >
@@ -261,8 +261,8 @@ export default function LearnLayout({ children }: { children: React.ReactNode })
 
         {/* Main content — offset for NavBar height when not logged in */}
         <main className={`flex-1 transition-all duration-300 relative min-h-screen ${user
-            ? sidebarOpen && !isAuthPage ? 'lg:ml-64 xl:ml-72' : !isAuthPage ? 'lg:ml-16 xl:ml-18' : ''
-            : 'pt-20 md:pt-24'
+          ? sidebarOpen && !isAuthPage ? 'lg:ml-64 xl:ml-72' : !isAuthPage ? 'lg:ml-16 xl:ml-18' : ''
+          : 'pt-20 md:pt-24'
           }`}>
           {children}
         </main>
