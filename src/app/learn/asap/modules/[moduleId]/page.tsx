@@ -1,315 +1,414 @@
 'use client';
 
-import { useParams, useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import {
+  ArrowLeft, Clock, BookOpen, Target, Award,
+  Loader2, CheckCircle, PlayCircle, ChevronRight,
+  FileText, Users,
+} from 'lucide-react';
+import LessonCard from '@/components/modules/LessonCard';
+import ProgressBar from '@/components/modules/ProgressBar';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { useAuthContext } from '@/context/AuthContext';
+import { MOCK_MODULES } from '@/lib/data/mockModules';
+import {
+  getUserProgress,
+  UserProgress,
+  isLessonUnlocked,
+  isLessonCompleted,
+} from '@/services/progressService';
 
-const MODULE_CONTENT: Record<
-  number,
-  {
-    title: string;
-    weekRange: string;
-    description: string;
-    lessons: { id: number; title: string; duration: string; type: string; completed: boolean }[];
-  }
-> = {
-  1: {
-    title: 'Career Mapping & Personal Branding',
-    weekRange: 'Weeks 1-2',
-    description:
-      'Build clarity around your professional identity and craft a personal brand that opens doors globally.',
-    lessons: [
-      { id: 1, title: 'Understanding Your Strengths', duration: '25 min', type: 'video', completed: true },
-      { id: 2, title: 'Career Trajectory Planning', duration: '30 min', type: 'reading', completed: true },
-      { id: 3, title: 'Building Your Personal Brand', duration: '20 min', type: 'video', completed: true },
-      { id: 4, title: 'LinkedIn Optimization Workshop', duration: '35 min', type: 'interactive', completed: true },
-      { id: 5, title: 'Portfolio Development Guide', duration: '40 min', type: 'reading', completed: true },
-    ],
-  },
-  2: {
-    title: 'Corporate Awareness & Professional Etiquette',
-    weekRange: 'Weeks 3-4',
-    description:
-      'Master the unwritten rules of corporate environments and professional communication.',
-    lessons: [
-      { id: 1, title: 'Corporate Culture 101', duration: '20 min', type: 'video', completed: true },
-      { id: 2, title: 'Business Communication Mastery', duration: '30 min', type: 'reading', completed: true },
-      { id: 3, title: 'Professional Networking Strategies', duration: '25 min', type: 'video', completed: true },
-      { id: 4, title: 'Email & Meeting Etiquette', duration: '15 min', type: 'interactive', completed: false },
-    ],
-  },
-  3: {
-    title: 'Design Thinking & Problem Solving',
-    weekRange: 'Weeks 5-7',
-    description:
-      'Apply human-centered design methodologies to create innovative solutions for real problems.',
-    lessons: [
-      { id: 1, title: 'Introduction to Design Thinking', duration: '30 min', type: 'video', completed: false },
-      { id: 2, title: 'Empathy Mapping Workshop', duration: '35 min', type: 'interactive', completed: false },
-      { id: 3, title: 'Ideation Techniques', duration: '25 min', type: 'reading', completed: false },
-      { id: 4, title: 'Prototyping & Testing', duration: '40 min', type: 'video', completed: false },
-    ],
-  },
-  4: {
-    title: 'Leadership & Influence',
-    weekRange: 'Weeks 8-10',
-    description:
-      'Develop the mindset, skills, and emotional intelligence to lead with authenticity and impact.',
-    lessons: [
-      { id: 1, title: 'Authentic Leadership', duration: '25 min', type: 'video', completed: false },
-      { id: 2, title: 'Emotional Intelligence Essentials', duration: '30 min', type: 'reading', completed: false },
-      { id: 3, title: 'Team Building & Delegation', duration: '20 min', type: 'interactive', completed: false },
-      { id: 4, title: 'Conflict Resolution & Negotiation', duration: '25 min', type: 'video', completed: false },
-    ],
-  },
-  5: {
-    title: 'Action Planning & Execution',
-    weekRange: 'Weeks 11-12',
-    description:
-      'Turn your vision into reality with structured planning, accountability, and execution strategies.',
-    lessons: [
-      { id: 1, title: 'Setting OKRs', duration: '20 min', type: 'video', completed: false },
-      { id: 2, title: 'Building Your Action Plan', duration: '35 min', type: 'interactive', completed: false },
-      { id: 3, title: 'Accountability Systems', duration: '15 min', type: 'reading', completed: false },
-      { id: 4, title: 'Final Pitch Preparation & Delivery', duration: '40 min', type: 'interactive', completed: false },
-    ],
-  },
-};
+export default function ModuleDetailPage({ params }: { params: { moduleId: string } }) {
+  return (
+    <ProtectedRoute>
+      <ModuleDetailContent params={params} />
+    </ProtectedRoute>
+  );
+}
 
-const TYPE_CONFIG: Record<string, { icon: string; color: string }> = {
-  video: { icon: '▶', color: 'text-blue-400 bg-blue-500/15' },
-  reading: { icon: '☰', color: 'text-amber-400 bg-amber-500/15' },
-  interactive: { icon: '⚡', color: 'text-purple-400 bg-purple-500/15' },
-};
-
-function ModuleContent() {
-  const params = useParams();
+function ModuleDetailContent({ params }: { params: { moduleId: string } }) {
   const router = useRouter();
-  const moduleId = Number(params.moduleId);
-  const mod = MODULE_CONTENT[moduleId];
-  const [activeLesson, setActiveLesson] = useState<number | null>(null);
+  const { user } = useAuthContext();
+  const { moduleId } = params;
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  if (!mod) {
+  const module = MOCK_MODULES.find((m) => m.id === moduleId);
+
+  useEffect(() => {
+    async function fetchProgress() {
+      if (!user) return;
+      try {
+        const data = await getUserProgress(user.uid);
+        setProgress(data);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProgress();
+  }, [user]);
+
+  /* ── Loading ── */
+  if (loading) {
     return (
-      <div className="min-h-screen text-white flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Module Not Found</h2>
-          <p className="text-[#b89d9f] mb-6">
-            This module doesn&apos;t exist or hasn&apos;t been created yet.
+      <div className="min-h-screen bg-[#181111] flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="w-10 h-10 rounded-full border-2 border-[#CC2630]/20 border-t-[#ea2a33] animate-spin mx-auto" />
+          <p className="text-[#b89d9f] text-[11px] font-bold uppercase tracking-widest">
+            Loading module…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── Not found ── */
+  if (!module) {
+    return (
+      <div className="min-h-screen bg-[#181111] flex items-center justify-center p-6">
+        <div className="max-w-sm text-center">
+          <div className="w-16 h-16 rounded-2xl bg-[#261c1c] border border-[#382929] flex items-center justify-center mx-auto mb-6">
+            <BookOpen size={28} className="text-[#ea2a33] opacity-40" />
+          </div>
+          <h2 className="text-2xl font-black text-white mb-3 tracking-tight">Module not found</h2>
+          <p className="text-[#b89d9f] text-sm mb-8 leading-relaxed">
+            This module doesn't exist or is restricted.
           </p>
           <button
-            onClick={() => router.push('/learn/dashboard')}
-            className="text-[#ea2a33] font-semibold hover:text-white transition-colors"
+            onClick={() => router.push('/learn/asap/modules')}
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white text-sm font-bold hover:shadow-lg hover:shadow-[#CC2630]/30 active:scale-[0.98] transition-all"
           >
-            Back to Dashboard
+            Back to Modules
           </button>
         </div>
       </div>
     );
   }
 
-  const completedCount = mod.lessons.filter((l) => l.completed).length;
-  const progress = Math.round((completedCount / mod.lessons.length) * 100);
-  const selectedLesson = mod.lessons.find((l) => l.id === activeLesson);
+  const moduleProgress = progress?.modules[module.id];
+  const completedCount = moduleProgress?.completedLessons.length || 0;
+  const totalLessons = module.lessons.length;
+  const progressPercent = moduleProgress?.progress || 0;
+  const totalDuration = module.lessons.reduce((acc, l) => acc + l.duration, 0);
+  const isModuleComplete = progressPercent === 100;
+
+  const lessonsWithStatus = module.lessons.map((lesson) => ({
+    ...lesson,
+    completed: isLessonCompleted(progress, module.id, lesson.id),
+    locked: !isLessonUnlocked(
+      progress,
+      module.id,
+      lesson.id,
+      lesson.order,
+      module.lessons
+    ),
+  }));
+
+  // Find the next unlocked incomplete lesson to continue from
+  const nextLesson = lessonsWithStatus.find((l) => !l.locked && !l.completed);
 
   return (
-    <div className="min-h-screen text-white">
-      {/* Module Header */}
-      <div className="bg-gradient-to-b from-[#261c1c] to-[#181111] border-b border-white/[0.06]">
-        <div className="max-w-6xl mx-auto px-6 py-8 md:py-12">
-          <Link
-            href="/learn/dashboard"
-            className="inline-flex items-center gap-1 text-[#b89d9f] hover:text-white text-sm transition-colors mb-4"
+    <div className="min-h-screen bg-[#181111] text-white">
+
+      {/* ══════════════════════════════
+          STICKY HEADER
+      ══════════════════════════════ */}
+      <header className="sticky top-0 z-40 bg-[#1e1515] border-b border-[#382929]">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+
+          <button
+            onClick={() => router.push('/learn/asap/modules')}
+            className="group flex items-center gap-2.5 text-[#b89d9f] hover:text-white transition-colors shrink-0"
           >
-            <span>&#8592;</span> Back to Dashboard
-          </Link>
-          <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#ea2a33] bg-[#ea2a33]/10 px-3 py-1 rounded-full">
-                  Module {moduleId}
+            <div className="w-8 h-8 rounded-lg bg-[#261c1c] border border-[#382929] flex items-center justify-center group-hover:border-[#533c3d] transition-colors">
+              <ArrowLeft size={15} />
+            </div>
+            <span className="text-xs font-bold hidden sm:block">All Modules</span>
+          </button>
+
+          {/* Right: progress */}
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-bold text-[#b89d9f] hidden sm:block">
+              {completedCount}/{totalLessons} lessons
+            </span>
+            <div className="w-24 sm:w-32 h-1.5 bg-[#382929] rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-[#CC2630] to-[#ea2a33] rounded-full transition-all duration-700"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+            <span className="text-xs font-black text-white w-9 text-right">
+              {progressPercent}%
+            </span>
+          </div>
+        </div>
+      </header>
+
+      {/* ══════════════════════════════
+          HERO BANNER
+      ══════════════════════════════ */}
+      <div className="bg-gradient-to-b from-[#261c1c] to-[#1d1414] border-b border-[#382929] relative overflow-hidden">
+        {/* Warm glow accent */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#CC2630]/6 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-10 md:py-14">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-8 xl:gap-12">
+
+            {/* Left: module info */}
+            <div className="flex-1 min-w-0">
+
+              {/* Week badge */}
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#CC2630]/10 border border-[#CC2630]/25 rounded-full mb-5">
+                <Award size={11} className="text-[#ea2a33]" />
+                <span className="text-[#ea2a33] text-[10px] font-black uppercase tracking-widest">
+                  {module.weekRange}
                 </span>
-                <span className="text-xs text-[#b89d9f]">{mod.weekRange}</span>
               </div>
-              <h1 className="text-2xl md:text-3xl font-bold mb-1">{mod.title}</h1>
-              <p className="text-[#b89d9f] text-sm max-w-xl">{mod.description}</p>
+
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight tracking-tight text-white mb-4">
+                {module.title}
+              </h1>
+              <p className="text-[#b89d9f] text-base leading-relaxed max-w-xl mb-7">
+                {module.description}
+              </p>
+
+              {/* Meta pills */}
+              <div className="flex flex-wrap gap-2.5 mb-7">
+                {[
+                  { icon: Clock, label: `${totalDuration} mins` },
+                  { icon: BookOpen, label: `${totalLessons} lessons` },
+                  { icon: CheckCircle, label: `${completedCount} done` },
+                ].map((item) => (
+                  <div
+                    key={item.label}
+                    className="flex items-center gap-1.5 px-3 py-1.5 bg-[#2d2222] border border-[#382929] rounded-lg"
+                  >
+                    <item.icon size={12} className="text-[#ea2a33]" />
+                    <span className="text-xs font-bold text-[#b89d9f]">{item.label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* CTA: continue or review */}
+              {nextLesson ? (
+                <button
+                  onClick={() =>
+                    router.push(
+                      `/learn/asap/modules/${moduleId}/lessons/${nextLesson.id}`
+                    )
+                  }
+                  className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white text-sm font-black uppercase tracking-wider hover:shadow-lg hover:shadow-[#CC2630]/30 active:scale-[0.98] transition-all"
+                >
+                  <PlayCircle size={16} />
+                  {completedCount === 0 ? 'Start Module' : 'Continue'}
+                  <ChevronRight size={14} className="opacity-70" />
+                </button>
+              ) : isModuleComplete ? (
+                <div className="inline-flex items-center gap-2.5 px-6 py-3 rounded-xl bg-emerald-900/30 border border-emerald-700/40 text-emerald-400 text-sm font-black uppercase tracking-wider">
+                  <CheckCircle size={16} />
+                  Module Complete
+                </div>
+              ) : null}
             </div>
-            <div className="flex items-center gap-3 flex-shrink-0">
-              <div className="text-right">
-                <p className="text-sm font-bold">
-                  {completedCount}/{mod.lessons.length} lessons
-                </p>
-                <p className="text-xs text-[#b89d9f]">{progress}% complete</p>
-              </div>
-              <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.06] flex items-center justify-center">
-                <svg className="w-6 h-6" viewBox="0 0 36 36">
-                  <path
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.06)"
-                    strokeWidth="3"
-                  />
-                  <path
-                    d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none"
-                    stroke="#ea2a33"
-                    strokeWidth="3"
-                    strokeDasharray={`${progress}, 100`}
-                    strokeLinecap="round"
-                  />
-                </svg>
+
+            {/* Right: progress card */}
+            <div className="w-full lg:w-60 xl:w-64 shrink-0">
+              <div className="bg-[#2d2222] border border-[#382929] rounded-xl overflow-hidden">
+
+                {/* Card header */}
+                <div className="px-5 pt-5 pb-4 border-b border-[#382929]">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-[10px] font-black text-[#ea2a33] uppercase tracking-widest">
+                      Progress
+                    </span>
+                    <span className="text-lg font-black text-white leading-none">
+                      {progressPercent}%
+                    </span>
+                  </div>
+                  <ProgressBar progress={progressPercent} height="md" />
+                </div>
+
+                {/* Stats grid */}
+                <div className="grid grid-cols-2 divide-x divide-[#382929]">
+                  <div className="px-4 py-3 text-center">
+                    <p className="text-xl font-black text-white leading-none mb-1">
+                      {completedCount}
+                      <span className="text-sm text-[#b89d9f] font-bold">/{totalLessons}</span>
+                    </p>
+                    <p className="text-[10px] text-[#b89d9f] uppercase tracking-widest">Lessons</p>
+                  </div>
+                  <div className="px-4 py-3 text-center">
+                    <p className="text-xl font-black text-white leading-none mb-1">{totalDuration}</p>
+                    <p className="text-[10px] text-[#b89d9f] uppercase tracking-widest">Minutes</p>
+                  </div>
+                </div>
+
+                {/* Lesson dots */}
+                <div className="px-5 py-4 border-t border-[#382929]">
+                  <p className="text-[10px] font-bold text-[#b89d9f]/60 uppercase tracking-widest mb-3">
+                    Lesson progress
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {lessonsWithStatus.map((l, i) => (
+                      <div
+                        key={l.id}
+                        title={l.title}
+                        className={`w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-black transition-all ${l.completed
+                          ? 'bg-emerald-500 text-white shadow-[0_0_6px_rgba(34,197,94,0.4)]'
+                          : l.id === nextLesson?.id
+                            ? 'bg-[#CC2630] text-white shadow-[0_0_6px_rgba(204,38,48,0.4)]'
+                            : l.locked
+                              ? 'bg-[#382929] text-[#b89d9f]/30'
+                              : 'bg-[#382929] text-[#b89d9f]/60'
+                          }`}
+                      >
+                        {l.completed ? '✓' : i + 1}
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
 
-      {/* Content Area */}
-      <div className="max-w-6xl mx-auto px-6 py-8 md:py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Lesson Sidebar */}
-          <div className="lg:col-span-4 xl:col-span-3">
-            <h3 className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-4">
-              Lessons
-            </h3>
+      {/* ══════════════════════════════
+          MAIN CONTENT
+      ══════════════════════════════ */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12">
+        <div className="flex flex-col lg:flex-row gap-8 xl:gap-12">
+
+          {/* ── LESSON LIST ── */}
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-0.5 h-7 bg-gradient-to-b from-[#ea2a33] to-transparent rounded-full" />
+                <div>
+                  <p className="text-[10px] font-black text-[#ea2a33] uppercase tracking-widest mb-0.5">
+                    {totalLessons} lessons
+                  </p>
+                  <h2 className="text-lg font-black text-white leading-none">Curriculum</h2>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-xs text-[#b89d9f]">
+                <Clock size={12} className="text-[#ea2a33]" />
+                {totalDuration} mins total
+              </div>
+            </div>
+
             <div className="space-y-2">
-              {mod.lessons.map((lesson) => {
-                const typeStyle = TYPE_CONFIG[lesson.type] || {
-                  icon: '●',
-                  color: 'text-white bg-white/10',
-                };
-                return (
-                  <button
-                    key={lesson.id}
-                    onClick={() => setActiveLesson(lesson.id)}
-                    className={`w-full text-left p-4 rounded-xl transition-all duration-200 ${
-                      activeLesson === lesson.id
-                        ? 'bg-[#ea2a33]/10 border border-[#ea2a33]/20'
-                        : 'bg-white/[0.03] border border-white/[0.06] hover:border-white/[0.1] hover:bg-white/[0.05]'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div
-                        className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 mt-0.5 ${
-                          lesson.completed ? 'bg-green-500/15 text-green-400' : typeStyle.color
-                        }`}
-                      >
-                        {lesson.completed ? '✓' : typeStyle.icon}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p
-                          className={`font-semibold text-sm leading-snug ${
-                            lesson.completed ? 'text-[#b89d9f]' : 'text-white'
-                          }`}
-                        >
-                          {lesson.title}
-                        </p>
-                        <p className="text-xs text-[#b89d9f] mt-1">
-                          {lesson.duration} &middot; {lesson.type}
-                        </p>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+              {lessonsWithStatus.map((lesson, index) => (
+                <LessonCard
+                  key={lesson.id}
+                  lesson={lesson}
+                  moduleId={module.id}
+                  index={index}
+                  isLocked={lesson.locked}
+                />
+              ))}
             </div>
           </div>
 
-          {/* Content Viewer */}
-          <div className="lg:col-span-8 xl:col-span-9">
-            {selectedLesson ? (
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl overflow-hidden">
-                {/* Lesson Header */}
-                <div className="p-6 md:p-8 border-b border-white/[0.06]">
-                  <div className="flex items-center gap-3 mb-2">
-                    <span
-                      className={`w-7 h-7 rounded-lg flex items-center justify-center text-xs ${
-                        TYPE_CONFIG[selectedLesson.type]?.color || 'bg-white/10'
-                      }`}
-                    >
-                      {TYPE_CONFIG[selectedLesson.type]?.icon || '●'}
-                    </span>
-                    <span className="text-xs text-[#b89d9f] uppercase tracking-wider font-medium">
-                      {selectedLesson.type} &middot; {selectedLesson.duration}
-                    </span>
-                    {selectedLesson.completed && (
-                      <span className="text-xs font-bold text-green-400 bg-green-500/15 px-2 py-0.5 rounded-full">
-                        Completed
-                      </span>
-                    )}
-                  </div>
-                  <h2 className="text-xl md:text-2xl font-bold">{selectedLesson.title}</h2>
-                </div>
+          {/* ── SIDEBAR ── */}
+          <aside className="w-full lg:w-64 xl:w-72 shrink-0">
+            <div className="lg:sticky lg:top-20 space-y-4">
 
-                {/* Content Placeholder */}
-                <div className="p-8 md:p-12">
-                  <div className="bg-white/[0.03] rounded-xl p-10 text-center border border-dashed border-white/[0.06]">
-                    <div className="w-16 h-16 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl">
-                        {TYPE_CONFIG[selectedLesson.type]?.icon || '●'}
+              {/* Objectives */}
+              <div className="bg-[#261c1c] border border-[#382929] rounded-xl overflow-hidden">
+                <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#382929]">
+                  <div className="w-7 h-7 rounded-lg bg-[#CC2630]/10 border border-[#CC2630]/20 flex items-center justify-center shrink-0">
+                    <Target size={13} className="text-[#ea2a33]" />
+                  </div>
+                  <h3 className="text-xs font-black text-white uppercase tracking-widest">
+                    Objectives
+                  </h3>
+                </div>
+                <ul className="p-5 space-y-3.5">
+                  {[
+                    'Understand core concepts and frameworks',
+                    'Apply learnings to real-world scenarios',
+                    'Complete the module deliverable',
+                    'Receive peer and mentor feedback',
+                  ].map((obj, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <div className="w-4 h-4 rounded-full bg-[#CC2630]/10 border border-[#CC2630]/25 flex items-center justify-center shrink-0 mt-0.5">
+                        <span className="text-[8px] font-black text-[#ea2a33]">{i + 1}</span>
+                      </div>
+                      <span className="text-sm text-[#b89d9f] leading-relaxed">{obj}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Deliverable */}
+              <div className="bg-[#261c1c] border border-[#382929] rounded-xl overflow-hidden">
+                <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#382929]">
+                  <div className="w-7 h-7 rounded-lg bg-[#CC2630]/10 border border-[#CC2630]/20 flex items-center justify-center shrink-0">
+                    <Award size={13} className="text-[#ea2a33]" />
+                  </div>
+                  <h3 className="text-xs font-black text-white uppercase tracking-widest">
+                    Deliverable
+                  </h3>
+                </div>
+                <div className="p-5">
+                  <p className="text-sm text-[#b89d9f] leading-relaxed mb-4">
+                    Complete the module project to earn your badge and unlock the next module.
+                  </p>
+                  <button className="w-full flex items-center justify-between px-4 py-3 rounded-lg bg-[#2d2222] border border-[#382929] hover:border-[#CC2630]/40 hover:bg-[#CC2630]/5 transition-all group">
+                    <div className="flex items-center gap-2.5">
+                      <FileText size={14} className="text-[#ea2a33] shrink-0" />
+                      <span className="text-xs font-bold text-white group-hover:text-[#EEB7BA] transition-colors">
+                        View Assignment Brief
                       </span>
                     </div>
-                    <p className="text-[#b89d9f] mb-2">
-                      Lesson content will appear here when the full curriculum is loaded.
-                    </p>
-                    <p className="text-[#b89d9f]/60 text-sm">
-                      This is a placeholder for {selectedLesson.type} content.
-                    </p>
-                  </div>
+                    <ChevronRight size={13} className="text-[#b89d9f]/40 group-hover:text-[#ea2a33] transition-colors" />
+                  </button>
                 </div>
+              </div>
 
-                {/* Lesson Navigation */}
-                <div className="p-6 border-t border-white/[0.06] flex items-center justify-between">
-                  <button
-                    onClick={() => {
-                      const prevId = selectedLesson.id - 1;
-                      if (prevId >= 1) setActiveLesson(prevId);
-                    }}
-                    disabled={selectedLesson.id === 1}
-                    className="text-sm text-[#b89d9f] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    &#8592; Previous Lesson
-                  </button>
-                  {!selectedLesson.completed && (
-                    <button className="bg-gradient-to-r from-[#CC2630] to-[#ea2a33] text-white px-6 py-2 rounded-lg text-sm font-semibold hover:opacity-90 transition-all">
-                      Mark Complete
+              {/* Resources */}
+              <div className="bg-[#261c1c] border border-[#382929] rounded-xl overflow-hidden">
+                <div className="flex items-center gap-2.5 px-5 py-4 border-b border-[#382929]">
+                  <div className="w-7 h-7 rounded-lg bg-[#CC2630]/10 border border-[#CC2630]/20 flex items-center justify-center shrink-0">
+                    <BookOpen size={13} className="text-[#ea2a33]" />
+                  </div>
+                  <h3 className="text-xs font-black text-white uppercase tracking-widest">
+                    Resources
+                  </h3>
+                </div>
+                <div className="p-3 space-y-1.5">
+                  {[
+                    { title: 'Module Reading List', meta: 'PDF · 8 pages', icon: FileText },
+                    { title: 'Career Planning Template', meta: 'Google Doc', icon: FileText },
+                    { title: 'Cohort Discussion Forum', meta: 'Community', icon: Users },
+                  ].map((res, i) => (
+                    <button
+                      key={i}
+                      className="w-full flex items-center gap-3 text-left px-3 py-2.5 rounded-lg bg-[#2d2222] border border-[#382929] hover:border-[#533c3d] hover:bg-[#382929] transition-all group"
+                    >
+                      <res.icon size={13} className="text-[#ea2a33] shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs font-bold text-white group-hover:text-[#EEB7BA] transition-colors truncate">
+                          {res.title}
+                        </p>
+                        <p className="text-[10px] text-[#b89d9f]/50 mt-0.5">{res.meta}</p>
+                      </div>
+                      <ChevronRight size={12} className="text-[#b89d9f]/30 group-hover:text-[#ea2a33] transition-colors shrink-0" />
                     </button>
-                  )}
-                  <button
-                    onClick={() => {
-                      const nextId = selectedLesson.id + 1;
-                      if (nextId <= mod.lessons.length) setActiveLesson(nextId);
-                    }}
-                    disabled={selectedLesson.id === mod.lessons.length}
-                    className="text-sm text-[#b89d9f] hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Next Lesson &#8594;
-                  </button>
+                  ))}
                 </div>
               </div>
-            ) : (
-              <div className="bg-white/[0.04] border border-white/[0.06] rounded-2xl p-12 text-center">
-                <div className="w-16 h-16 rounded-2xl bg-white/[0.04] flex items-center justify-center mx-auto mb-4">
-                  <span className="text-2xl text-[#b89d9f]">&#9654;</span>
-                </div>
-                <p className="text-[#b89d9f] text-lg mb-1">Select a lesson to begin</p>
-                <p className="text-[#b89d9f]/60 text-sm">
-                  Choose from the lesson list on the left to start learning
-                </p>
-              </div>
-            )}
-          </div>
+
+            </div>
+          </aside>
+
         </div>
       </div>
     </div>
-  );
-}
-
-export default function ModulePage() {
-  return (
-    <ProtectedRoute>
-      <ModuleContent />
-    </ProtectedRoute>
   );
 }
