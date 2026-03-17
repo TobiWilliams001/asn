@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 
 const MODULES = [
   { id: 1, title: 'Career Mapping & Personal Branding', weekRange: 'Weeks 1-2', description: 'Define your career trajectory and build a compelling personal brand that positions you for global opportunities.', icon: '01' },
@@ -19,7 +20,17 @@ export default function LearnLandingPage() {
   return (
     <div className="min-h-screen text-white">
       {/* Hero */}
-      <div className="relative bg-gradient-to-b from-[#261c1c] to-[#181111] border-b border-white/[0.06] overflow-hidden">
+      <div className="relative bg-gradient-to-b from-[#261c1c] to-[#181111] border-b border-white/[0.06] overflow-hidden min-h-[60vh] flex items-center">
+        {/* Hero Background Image */}
+        <Image 
+          src="/asn_bg.svg" 
+          fill 
+          style={{ objectFit: "cover", mixBlendMode: "multiply" }} 
+          alt="" 
+          className="z-0 opacity-60" 
+          priority 
+        />
+        
         {/* Gradient orbs */}
         <div className="absolute top-10 right-10 w-72 h-72 bg-[#ea2a33]/8 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-0 left-10 w-96 h-96 bg-[#CC2630]/5 rounded-full blur-3xl pointer-events-none" />
