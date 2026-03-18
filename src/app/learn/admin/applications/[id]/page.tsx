@@ -1,14 +1,14 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle, XCircle, Loader2, Mail, Phone, MapPin, GraduationCap, FileText, Target } from 'lucide-react';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { getApplication, approveApplication, rejectApplication, Application } from '@/services/adminService';
 
-export default function ApplicationReviewPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ApplicationReviewPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { id } = use(params);
+  const { id } = params;
   const [application, setApplication] = useState<Application | null>(null);
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);

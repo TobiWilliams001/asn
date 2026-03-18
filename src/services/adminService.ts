@@ -1,15 +1,15 @@
-import { 
-  collection, 
-  query, 
-  where, 
-  orderBy, 
-  getDocs, 
+import {
+  collection,
+  query,
+  where,
+  orderBy,
+  getDocs,
   getDoc,
-  doc, 
+  doc,
   updateDoc,
   deleteDoc,
   serverTimestamp,
-  Timestamp 
+  Timestamp
 } from 'firebase/firestore';
 import { learnDb } from '@/firebase/learnConfig';
 import { initializeUserProgress } from './progressService';
@@ -56,14 +56,14 @@ export interface UserProfile {
  */
 export async function getAllApplications(status?: 'pending' | 'accepted' | 'rejected'): Promise<Application[]> {
   const applicationsRef = collection(learnDb, 'applications');
-  
+
   let q;
   if (status) {
     q = query(applicationsRef, where('status', '==', status), orderBy('submittedAt', 'desc'));
   } else {
     q = query(applicationsRef, orderBy('submittedAt', 'desc'));
   }
-  
+
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -77,9 +77,9 @@ export async function getAllApplications(status?: 'pending' | 'accepted' | 'reje
 export async function getApplication(applicationId: string): Promise<Application | null> {
   const appRef = doc(learnDb, 'applications', applicationId);
   const appSnap = await getDoc(appRef);
-  
+
   if (!appSnap.exists()) return null;
-  
+
   return {
     id: appSnap.id,
     ...appSnap.data()
@@ -93,14 +93,14 @@ export async function approveApplication(applicationId: string, userId: string, 
   const appRef = doc(learnDb, 'applications', applicationId);
   const userRef = doc(learnDb, 'users', userId);
   
-  // Update application status
+  // 1. Update application status
   await updateDoc(appRef, {
     status: 'accepted',
     adminNotes: adminNotes || '',
     reviewedAt: serverTimestamp(),
   });
   
-  // Update user role and status
+  // 2. Update user role and status
   await updateDoc(userRef, {
     role: 'enrolled',
     asapStatus: 'enrolled',
@@ -108,7 +108,7 @@ export async function approveApplication(applicationId: string, userId: string, 
     updatedAt: serverTimestamp(),
   });
   
-  // Initialize progress
+  // 3. Initialize progress
   await initializeUserProgress(userId);
 }
 
@@ -118,14 +118,14 @@ export async function approveApplication(applicationId: string, userId: string, 
 export async function rejectApplication(applicationId: string, userId: string, adminNotes?: string): Promise<void> {
   const appRef = doc(learnDb, 'applications', applicationId);
   const userRef = doc(learnDb, 'users', userId);
-  
+
   // Update application status
   await updateDoc(appRef, {
     status: 'rejected',
     adminNotes: adminNotes || '',
     reviewedAt: serverTimestamp(),
   });
-  
+
   // Update user status
   await updateDoc(userRef, {
     asapStatus: 'rejected',
@@ -138,14 +138,14 @@ export async function rejectApplication(applicationId: string, userId: string, a
  */
 export async function getAllUsers(role?: string): Promise<UserProfile[]> {
   const usersRef = collection(learnDb, 'users');
-  
+
   let q;
   if (role) {
     q = query(usersRef, where('role', '==', role), orderBy('createdAt', 'desc'));
   } else {
     q = query(usersRef, orderBy('createdAt', 'desc'));
   }
-  
+
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({
     id: doc.id,
@@ -159,9 +159,9 @@ export async function getAllUsers(role?: string): Promise<UserProfile[]> {
 export async function getUserById(userId: string): Promise<UserProfile | null> {
   const userRef = doc(learnDb, 'users', userId);
   const userSnap = await getDoc(userRef);
-  
+
   if (!userSnap.exists()) return null;
-  
+
   return {
     id: userSnap.id,
     ...userSnap.data()
@@ -173,7 +173,7 @@ export async function getUserById(userId: string): Promise<UserProfile | null> {
  */
 export async function updateUserRole(userId: string, role: 'free' | 'applicant' | 'enrolled' | 'admin'): Promise<void> {
   const userRef = doc(learnDb, 'users', userId);
-  
+
   await updateDoc(userRef, {
     role,
     updatedAt: serverTimestamp(),
@@ -186,10 +186,10 @@ export async function updateUserRole(userId: string, role: 'free' | 'applicant' 
 export async function deleteUser(userId: string): Promise<void> {
   const userRef = doc(learnDb, 'users', userId);
   const progressRef = doc(learnDb, 'progress', userId);
-  
+
   // Delete user document
   await deleteDoc(userRef);
-  
+
   // Delete progress if exists
   try {
     await deleteDoc(progressRef);
@@ -206,14 +206,14 @@ export async function getDashboardStats() {
     getAllApplications(),
     getAllUsers()
   ]);
-  
+
   const pendingApplications = allApplications.filter(app => app.status === 'pending');
   const enrolledUsers = allUsers.filter(user => user.role === 'enrolled');
-  
+
   // Calculate average completion (would need progress data)
   // Placeholder for now
   const averageCompletion = 45;
-  
+
   return {
     totalApplications: allApplications.length,
     pendingApplications: pendingApplications.length,

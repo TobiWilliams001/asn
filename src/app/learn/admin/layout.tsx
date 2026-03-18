@@ -10,7 +10,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const router = useRouter();
   const { userProfile, loading } = useAuthContext();
 
-  /* 
   useEffect(() => {
     if (!loading && userProfile?.role !== 'admin') {
       router.push('/learn/dashboard');
@@ -31,7 +30,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   if (userProfile?.role !== 'admin') {
     return null; // Will redirect in useEffect
   }
-  */
 
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-[#0a0506] via-[#181111] to-[#0f0909]">

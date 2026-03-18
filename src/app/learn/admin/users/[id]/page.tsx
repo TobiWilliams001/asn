@@ -1,6 +1,7 @@
 'use client';
 
-import { use, useEffect, useState } from 'react';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mail, MapPin, GraduationCap, Loader2, Trash2, Unlock } from 'lucide-react';
 import StatusBadge from '@/components/admin/StatusBadge';
@@ -9,9 +10,9 @@ import { getUserById, updateUserRole, deleteUser, UserProfile } from '@/services
 import { getUserProgress, UserProgress } from '@/services/progressService';
 import { MOCK_MODULES } from '@/lib/data/mockModules';
 
-export default function UserDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function UserDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
-  const { id } = use(params);
+  const { id } = params;
   const [user, setUser] = useState<UserProfile | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -192,7 +193,9 @@ export default function UserDetailPage({ params }: { params: Promise<{ id: strin
                     </div>
                     <ProgressBar progress={module.progress || 0} height="sm" />
                     <div className="flex items-center justify-between mt-2 text-xs text-[#b89d9f]">
-                      <span>{module.completedLessons?.length || 0} / {module.lessons.length} lessons</span>
+                      <span>
+                        {Array.isArray(module.completedLessons) ? module.completedLessons.length : 0} / {module.lessons.length} lessons
+                      </span>
                       <span>{Math.round(module.progress || 0)}%</span>
                     </div>
                   </div>
