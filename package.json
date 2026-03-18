@@ -9,9 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@hello-pangea/dnd": "^18.0.1",
     "@paystack/inline-js": "^2.22.7",
     "@tinymce/tinymce-react": "^4.3.0",
     "dayjs": "^1.11.12",
+    "dotenv": "^17.3.1",
     "firebase": "^12.9.0",
     "formik": "^2.4.5",
     "lucide-react": "^0.563.0",
@@ -21,6 +23,7 @@
     "react-dom": "^18",
     "react-intersection-observer": "^9.13.1",
     "react-loader-spinner": "^5.4.5",
+    "react-quill": "^2.0.0",
     "yup": "^1.3.2"
   },
   "devDependencies": {
