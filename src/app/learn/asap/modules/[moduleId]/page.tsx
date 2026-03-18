@@ -11,13 +11,13 @@ import LessonCard from '@/components/modules/LessonCard';
 import ProgressBar from '@/components/modules/ProgressBar';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthContext } from '@/context/AuthContext';
-import { MOCK_MODULES } from '@/lib/data/mockModules';
 import {
   getUserProgress,
   UserProgress,
   isLessonUnlocked,
   isLessonCompleted,
 } from '@/services/progressService';
+import { getModule, Module } from '@/services/moduleService';
 
 export default function ModuleDetailPage({ params }: { params: { moduleId: string } }) {
   return (
@@ -32,24 +32,27 @@ function ModuleDetailContent({ params }: { params: { moduleId: string } }) {
   const { user } = useAuthContext();
   const { moduleId } = params;
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [module, setModule] = useState<Module | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const module = MOCK_MODULES.find((m) => m.id === moduleId);
-
   useEffect(() => {
-    async function fetchProgress() {
+    async function fetchData() {
       if (!user) return;
       try {
-        const data = await getUserProgress(user.uid);
-        setProgress(data);
+        const [progressData, moduleData] = await Promise.all([
+          getUserProgress(user.uid),
+          getModule(moduleId)
+        ]);
+        setProgress(progressData);
+        setModule(moduleData);
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching module or progress:', err);
       } finally {
         setLoading(false);
       }
     }
-    fetchProgress();
-  }, [user]);
+    fetchData();
+  }, [user, moduleId]);
 
   /* ── Loading ── */
   if (loading) {

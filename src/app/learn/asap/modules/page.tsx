@@ -9,7 +9,7 @@ import {
 } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthContext } from '@/context/AuthContext';
-import { MOCK_MODULES } from '@/lib/data/mockModules';
+import { getAllModules, Module } from '@/services/moduleService';
 import { getUserProgress, UserProgress } from '@/services/progressService';
 
 export default function ModulesPage() {
@@ -22,22 +22,27 @@ export default function ModulesPage() {
 
 function ModulesContent() {
   const { user } = useAuthContext();
+  const [modules, setModules] = useState<Module[]>([]);
   const [progress, setProgress] = useState<UserProgress | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchProgress() {
+    async function fetchData() {
       if (!user) return;
       try {
-        const data = await getUserProgress(user.uid);
-        setProgress(data);
+        const [modulesData, progressData] = await Promise.all([
+          getAllModules(),
+          getUserProgress(user.uid)
+        ]);
+        setModules(modulesData);
+        setProgress(progressData);
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching modules or progress:', err);
       } finally {
         setLoading(false);
       }
     }
-    fetchProgress();
+    fetchData();
   }, [user]);
 
   if (loading) {
@@ -51,7 +56,7 @@ function ModulesContent() {
     );
   }
 
-  const modulesWithProgress = MOCK_MODULES.map((mod) => {
+  const modulesWithProgress = modules.map((mod) => {
     const mp = progress?.modules[mod.id];
     return {
       ...mod,

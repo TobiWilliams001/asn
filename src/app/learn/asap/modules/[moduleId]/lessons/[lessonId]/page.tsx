@@ -11,13 +11,13 @@ import {
 import ContentViewer from '@/components/modules/ContentViewer';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthContext } from '@/context/AuthContext';
-import { MOCK_MODULES } from '@/lib/data/mockModules';
 import {
   getUserProgress,
   markLessonComplete,
   UserProgress,
   isLessonCompleted,
 } from '@/services/progressService';
+import { getModule, Module, Lesson } from '@/services/moduleService';
 
 export default function LessonViewerPage({
   params,
@@ -41,27 +41,35 @@ function LessonViewerContent({
   const { moduleId, lessonId } = params;
   const [activeTab, setActiveTab] = useState<'overview' | 'resources' | 'discussion'>('overview');
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [module, setModule] = useState<Module | null>(null);
+  const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
   const [marking, setMarking] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const module = MOCK_MODULES.find((m) => m.id === moduleId);
-  const lesson = module?.lessons.find((l) => l.id === lessonId);
-
   useEffect(() => {
-    async function fetchProgress() {
+    async function fetchData() {
       if (!user) return;
       try {
-        const data = await getUserProgress(user.uid);
-        setProgress(data);
+        const [progressData, moduleData] = await Promise.all([
+          getUserProgress(user.uid),
+          getModule(moduleId)
+        ]);
+        setProgress(progressData);
+        setModule(moduleData);
+        
+        if (moduleData) {
+          const l = moduleData.lessons.find((l) => l.id === lessonId);
+          setLesson(l || null);
+        }
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching lesson or progress:', err);
       } finally {
         setLoading(false);
       }
     }
-    fetchProgress();
-  }, [user]);
+    fetchData();
+  }, [user, moduleId, lessonId]);
 
   if (loading) {
     return (
