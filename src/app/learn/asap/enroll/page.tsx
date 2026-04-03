@@ -16,12 +16,11 @@ export default function ASAPEnrollPage() {
   );
 }
 
-const COUNTRIES = [
-  'Nigeria', 'Kenya', 'Ghana', 'South Africa', 'Egypt',
-  'Ethiopia', 'Uganda', 'Tanzania', 'Rwanda', 'Senegal',
-  'Côte d\'Ivoire', 'Morocco', 'Tunisia', 'Zambia', 'Zimbabwe',
-  'Botswana', 'Namibia', 'Cameroon', 'Other'
-];
+import PhoneInput from 'react-phone-number-input';
+import 'react-phone-number-input/style.css';
+import { getData } from 'country-list';
+
+const COUNTRIES = getData().map(c => c.name).sort();
 
 const TRACKS = [
   {
@@ -68,7 +67,8 @@ function EnrollContent() {
   }, [userProfile, router]);
 
   const [formData, setFormData] = useState({
-    fullName: userProfile?.fullName || user?.displayName || '',
+    firstName: userProfile?.firstName || user?.displayName?.split(' ')[0] || '',
+    lastName: userProfile?.lastName || user?.displayName?.split(' ').slice(1).join(' ') || '',
     email: userProfile?.email || user?.email || '',
     phone: '',
     country: userProfile?.country || '',
@@ -98,7 +98,9 @@ function EnrollContent() {
         submittedAt: serverTimestamp(),
         
         personalInfo: {
-          fullName: formData.fullName,
+          fullName: `${formData.firstName} ${formData.lastName}`,
+          firstName: formData.firstName,
+          lastName: formData.lastName,
           email: formData.email,
           phone: formData.phone,
           country: formData.country,
@@ -139,7 +141,7 @@ function EnrollContent() {
 
   const canProceed = () => {
     if (currentStep === 1) {
-      return formData.fullName && formData.email && formData.phone && 
+      return formData.firstName && formData.lastName && formData.email && formData.phone && 
              formData.country && formData.city && formData.bio && 
              formData.statementOfIntent.split(' ').filter(Boolean).length >= 250;
     }
@@ -263,22 +265,44 @@ function EnrollContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="group">
                     <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
-                      Full Legal Name
-                      {formData.fullName && <Check size={14} className="text-white/40" />}
+                      First Name *
+                      {formData.firstName && <Check size={14} className="text-white/40" />}
                     </label>
                     <input
                       type="text"
-                      name="fullName"
-                      value={formData.fullName}
+                      name="firstName"
+                      value={formData.firstName}
                       onChange={handleChange}
-                      onFocus={() => setFocusedField('fullName')}
+                      onFocus={() => setFocusedField('firstName')}
                       onBlur={() => setFocusedField(null)}
-                      autoComplete="name"
+                      autoComplete="given-name"
                       className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
-                        focusedField === 'fullName' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
-                        formData.fullName ? 'border-white/20' : 'border-white/[0.06]'
+                        focusedField === 'firstName' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.firstName ? 'border-white/20' : 'border-white/[0.06]'
                       }`}
-                      placeholder="As it appears on ID"
+                      placeholder="e.g. John"
+                      required
+                    />
+                  </div>
+
+                  <div className="group">
+                    <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
+                      Last Name *
+                      {formData.lastName && <Check size={14} className="text-white/40" />}
+                    </label>
+                    <input
+                      type="text"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      onFocus={() => setFocusedField('lastName')}
+                      onBlur={() => setFocusedField(null)}
+                      autoComplete="family-name"
+                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
+                        focusedField === 'lastName' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                        formData.lastName ? 'border-white/20' : 'border-white/[0.06]'
+                      }`}
+                      placeholder="e.g. Doe"
                       required
                     />
                   </div>
@@ -310,21 +334,20 @@ function EnrollContent() {
                       Phone Number
                       {formData.phone && <Check size={14} className="text-white/40" />}
                     </label>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleChange}
-                      onFocus={() => setFocusedField('phone')}
-                      onBlur={() => setFocusedField(null)}
-                      autoComplete="tel"
-                      className={`w-full rounded-xl px-4 py-4 text-sm bg-[#0f0a0b] border-2 transition-all text-white placeholder-[#b89d9f]/40 focus:outline-none ${
-                        focusedField === 'phone' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
-                        formData.phone ? 'border-white/20' : 'border-white/[0.06]'
-                      }`}
-                      placeholder="+234 ..."
-                      required
-                    />
+                    <div className={`phone-input-container w-full rounded-xl px-4 py-0.5 bg-[#0f0a0b] border-2 transition-all ${
+                      focusedField === 'phone' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
+                      formData.phone ? 'border-white/20' : 'border-white/[0.06]'
+                    }`}>
+                      <PhoneInput
+                        international
+                        defaultCountry="NG"
+                        value={formData.phone}
+                        onChange={(value) => setFormData(prev => ({ ...prev, phone: value || '' }))}
+                        onFocus={() => setFocusedField('phone')}
+                        onBlur={() => setFocusedField(null)}
+                        className="bg-[#0f0a0b] text-white text-sm py-3.5 focus:outline-none enrollment-phone-input"
+                      />
+                    </div>
                   </div>
 
                   <div className="group">
@@ -352,7 +375,7 @@ function EnrollContent() {
                     </select>
                   </div>
 
-                  <div className="md:col-span-2 group">
+                  <div className="group">
                     <label className="text-xs font-bold uppercase tracking-wider text-[#EEB7BA] mb-2.5 block flex items-center gap-2">
                       City / Region
                       {formData.city && <Check size={14} className="text-white/40" />}
@@ -368,7 +391,7 @@ function EnrollContent() {
                         focusedField === 'city' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
                         formData.city ? 'border-white/20' : 'border-white/[0.06]'
                       }`}
-                      placeholder="e.g. Lagos, Nairobi, Johannesburg"
+                      placeholder="e.g. Lagos, Nairobi, Accra"
                       required
                     />
                   </div>
@@ -465,6 +488,7 @@ function EnrollContent() {
                   <input
                     type="text"
                     name="university"
+                    list="universities"
                     value={formData.university}
                     onChange={handleChange}
                     onFocus={() => setFocusedField('university')}
@@ -474,9 +498,23 @@ function EnrollContent() {
                       focusedField === 'university' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
                       formData.university ? 'border-white/20' : 'border-white/[0.06]'
                     }`}
-                    placeholder="e.g. University of Cape Town"
+                    placeholder="e.g. University of Lagos"
                     required
                   />
+                  <datalist id="universities">
+                    <option value="University of Lagos" />
+                    <option value="University of Ibadan" />
+                    <option value="Kwame Nkrumah University of Science and Technology" />
+                    <option value="University of Ghana" />
+                    <option value="University of Nairobi" />
+                    <option value="University of Cape Town" />
+                    <option value="Makerere University" />
+                    <option value="Addis Ababa University" />
+                    <option value="Cairo University" />
+                    <option value="American University in Cairo" />
+                    <option value="Ashesi University" />
+                    <option value="University of Pretoria" />
+                  </datalist>
                 </div>
 
                 <div className="group">
@@ -487,6 +525,7 @@ function EnrollContent() {
                   <input
                     type="text"
                     name="degreeProgram"
+                    list="degrees"
                     value={formData.degreeProgram}
                     onChange={handleChange}
                     onFocus={() => setFocusedField('degree')}
@@ -495,9 +534,23 @@ function EnrollContent() {
                       focusedField === 'degree' ? 'border-[#ea2a33] shadow-lg shadow-[#ea2a33]/20' : 
                       formData.degreeProgram ? 'border-white/20' : 'border-white/[0.06]'
                     }`}
-                    placeholder="e.g. B.Sc. Computer Science"
+                    placeholder="e.g. Computer Science"
                     required
                   />
+                  <datalist id="degrees">
+                    <option value="Computer Science" />
+                    <option value="Business Administration" />
+                    <option value="Engineering" />
+                    <option value="Economics" />
+                    <option value="Law" />
+                    <option value="Medicine" />
+                    <option value="Accounting" />
+                    <option value="Marketing" />
+                    <option value="International Relations" />
+                    <option value="Political Science" />
+                    <option value="Information Technology" />
+                    <option value="Mathematics" />
+                  </datalist>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -694,8 +747,8 @@ function EnrollContent() {
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-12">
                     <div>
-                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Full Name</p>
-                      <p className="text-sm font-semibold text-white">{formData.fullName}</p>
+                      <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Name</p>
+                      <p className="text-sm font-semibold text-white">{formData.firstName} {formData.lastName}</p>
                     </div>
                     <div>
                       <p className="text-xs text-[#b89d9f] mb-1.5 uppercase font-semibold">Email</p>
