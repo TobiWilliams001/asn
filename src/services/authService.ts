@@ -21,16 +21,23 @@ export interface UserProfile {
   id: string;
   email: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
   country: string;
   currentStatus: CurrentStatus;
   institution: string | null;
   referralSource: string | null;
   role: 'free' | 'enrolled';
   bio?: string;
-  asapStatus?: 'none' | 'applicant' | 'enrolled';
+  location?: string;
+  phone?: string;
+  linkedinUrl?: string;
+  profilePicture?: string;
+  asapStatus?: 'none' | 'applicant' | 'enrolled' | 'rejected';
+  asapApplicationId?: string;
   onboardingComplete?: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: any;
+  updatedAt: any;
 }
 
 export interface SignupData {

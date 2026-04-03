@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import {
   Mail,
@@ -16,12 +16,17 @@ import {
   User,
   Globe as GlobeIcon,
   Loader2,
+  Phone,
+  Linkedin,
+  Award,
 } from 'lucide-react';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { useAuthContext } from '@/context/AuthContext';
 import { doc, setDoc } from 'firebase/firestore';
-import { learnDb } from '@/firebase/learnConfig';
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { learnDb, storage } from '@/firebase/learnConfig';
 import { updateProfile } from 'firebase/auth';
+import { getUserProgress, UserProgress } from '@/services/progressService';
 
 export default function ProfilePage() {
   return (
@@ -35,8 +40,10 @@ function ProfileContent() {
   const { user, userProfile } = useAuthContext(); 
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState('');
+  const [progress, setProgress] = useState<UserProgress | null>(null);
 
   const [formData, setFormData] = useState({
     fullName: userProfile?.fullName || user?.displayName || '',
@@ -44,7 +51,27 @@ function ProfileContent() {
     country: userProfile?.country || '',
     institution: userProfile?.institution || '',
     currentStatus: userProfile?.currentStatus || '',
+    phone: userProfile?.phone || '',
+    linkedinUrl: userProfile?.linkedinUrl || '',
+    location: userProfile?.location || '',
+    profilePicture: userProfile?.profilePicture || '',
   });
+
+  useEffect(() => {
+    if (user?.uid && userProfile?.role === 'enrolled') {
+      fetchProgress();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, userProfile]);
+
+  async function fetchProgress() {
+    try {
+      const progressData = await getUserProgress(user!.uid);
+      setProgress(progressData);
+    } catch (error) {
+      console.error('Error fetching progress:', error);
+    }
+  }
 
   const fullName = formData.fullName || userProfile?.fullName || user?.displayName || 'User';
   const nameParts = fullName.split(' ');
@@ -56,6 +83,41 @@ function ProfileContent() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user?.uid) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const storageRef = ref(storage, `profile-pictures/${user.uid}`);
+      await uploadBytes(storageRef, file);
+      const downloadURL = await getDownloadURL(storageRef);
+
+      const userDocRef = doc(learnDb, 'users', user.uid);
+      await setDoc(userDocRef, { profilePicture: downloadURL }, { merge: true });
+
+      setFormData({ ...formData, profilePicture: downloadURL });
+      setSaveStatus('success');
+      setTimeout(() => setSaveStatus('idle'), 2000);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      setErrorMessage('Failed to upload image');
+      setSaveStatus('error');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSave = async () => {
     if (!user) return;
 
@@ -64,26 +126,22 @@ function ProfileContent() {
     setErrorMessage('');
 
     try {
-      console.log('🔄 Saving profile...', user.uid);
-
       const userDocRef = doc(learnDb, 'users', user.uid);
 
-      // setDoc with merge - creates doc if missing, updates if exists
       await setDoc(userDocRef, {
         fullName: formData.fullName,
         bio: formData.bio,
         country: formData.country,
         institution: formData.institution || null,
         currentStatus: formData.currentStatus,
+        phone: formData.phone,
+        linkedinUrl: formData.linkedinUrl,
+        location: formData.location,
         updatedAt: new Date(),
       }, { merge: true });
 
-      console.log('Firestore saved');
-
-      // Update Firebase Auth display name if it changed
       if (formData.fullName !== user.displayName) {
         await updateProfile(user, { displayName: formData.fullName });
-        console.log(' Auth display name updated');
       }
 
       setSaveStatus('success');
@@ -118,6 +176,10 @@ function ProfileContent() {
       country: userProfile?.country || '',
       institution: userProfile?.institution || '',
       currentStatus: userProfile?.currentStatus || '',
+      phone: userProfile?.phone || '',
+      linkedinUrl: userProfile?.linkedinUrl || '',
+      location: userProfile?.location || '',
+      profilePicture: userProfile?.profilePicture || '',
     });
     setIsEditing(false);
     setSaveStatus('idle');
@@ -157,18 +219,27 @@ function ProfileContent() {
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between -mt-16 sm:-mt-20 mb-6 gap-4">
               <div className="relative inline-block">
                 <div className="w-28 h-28 sm:w-32 sm:h-32 rounded-3xl bg-gradient-to-br from-[#ea2a33] to-[#b91c1c] flex items-center justify-center text-white text-4xl font-bold shadow-2xl border-4 border-[#1a1314]">
-                  {user?.photoURL ? (
+                  {formData.profilePicture ? (
+                    <Image src={formData.profilePicture} alt="Profile" className="w-full h-full rounded-3xl object-cover" width={128} height={128} />
+                  ) : user?.photoURL ? (
                     <Image src={user.photoURL} alt="Profile" className="w-full h-full rounded-3xl object-cover" width={128} height={128} />
                   ) : (
                     initials
                   )}
                 </div>
-                <button
-                  className="absolute bottom-1 right-1 w-10 h-10 bg-[#ea2a33] hover:bg-[#b91c1c] rounded-xl flex items-center justify-center text-white shadow-lg transition-all hover:scale-105 active:scale-95"
+                <label
+                  className="absolute bottom-1 right-1 w-10 h-10 bg-[#ea2a33] hover:bg-[#b91c1c] rounded-xl flex items-center justify-center text-white shadow-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
                   title="Change photo"
                 >
-                  <Camera size={18} />
-                </button>
+                  {uploading ? <Loader2 size={18} className="animate-spin" /> : <Camera size={18} />}
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={uploading}
+                  />
+                </label>
               </div>
 
               <div className="flex items-center gap-2">
@@ -373,7 +444,111 @@ function ProfileContent() {
                   </div>
                 </div>
               </div>
+
+              {/* Phone - NEW */}
+              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <Phone size={22} className="text-[#ea2a33]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Phone</div>
+                    {isEditing ? (
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full text-base text-white font-medium bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] placeholder:text-gray-500"
+                        placeholder="+234 XXX XXX XXXX"
+                      />
+                    ) : (
+                      <div className="text-base text-white font-medium">
+                        {formData.phone || <span className="text-gray-500 italic">Not specified</span>}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* LinkedIn - NEW */}
+              <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6 hover:bg-[#0f0a0b]/70 transition-all group">
+                <div className="flex items-start gap-4">
+                  <div className="w-12 h-12 rounded-xl bg-[#ea2a33]/10 flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform">
+                    <Linkedin size={22} className="text-[#ea2a33]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">LinkedIn</div>
+                    {isEditing ? (
+                      <input
+                        type="url"
+                        name="linkedinUrl"
+                        value={formData.linkedinUrl}
+                        onChange={handleInputChange}
+                        className="w-full text-base text-white font-medium bg-white/5 border border-white/10 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#ea2a33] placeholder:text-gray-500"
+                        placeholder="https://linkedin.com/in/username"
+                      />
+                    ) : (
+                      <div className="text-base text-white font-medium truncate">
+                        {formData.linkedinUrl ? (
+                          <a href={formData.linkedinUrl} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                            {formData.linkedinUrl.replace('https://linkedin.com/in/', '').replace('https://www.linkedin.com/in/', '')}
+                          </a>
+                        ) : (
+                          <span className="text-gray-500 italic">Not specified</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
             </div>
+
+            {/* Progress & Achievements - NEW (for enrolled students) */}
+            {userProfile?.role === 'enrolled' && progress && (
+              <div className="mt-8 pt-8 border-t border-white/10">
+                <div className="flex items-center gap-3 mb-6">
+                  <Award size={24} className="text-[#ea2a33]" />
+                  <h3 className="text-xl font-bold text-white">Progress & Achievements</h3>
+                </div>
+
+                {/* Progress Bar */}
+                <div className="mb-6 bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="text-sm font-semibold text-gray-300">Overall Progress</span>
+                    <span className="text-lg font-black text-white">{progress.overallProgress || 0}%</span>
+                  </div>
+                  <div className="w-full h-3 bg-[#1a1314] rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-gradient-to-r from-[#ea2a33] to-[#c41e3a] rounded-full transition-all duration-500"
+                      style={{ width: `${progress.overallProgress || 0}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Achievement Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-5 text-center hover:bg-[#0f0a0b]/70 transition-all">
+                    <p className="text-3xl font-black text-emerald-400 mb-1">
+                      {progress.completedLessons?.length || 0}
+                    </p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Lessons Completed</p>
+                  </div>
+                  <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-5 text-center hover:bg-[#0f0a0b]/70 transition-all">
+                    <p className="text-3xl font-black text-blue-400 mb-1">
+                      {Object.values(progress.modules || {}).filter((m) => m.status === 'completed').length}
+                    </p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Modules Finished</p>
+                  </div>
+                  <div className="bg-[#0f0a0b]/50 border border-white/10 rounded-2xl p-5 text-center hover:bg-[#0f0a0b]/70 transition-all">
+                    <p className="text-3xl font-black text-amber-400 mb-1">
+                      {progress.overallProgress || 0}%
+                    </p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Overall Progress</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
