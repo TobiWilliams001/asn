@@ -2,8 +2,8 @@
 import { useEffect, useState, useRef } from "react"
 import { manual } from "../../styles/font"
 import BlogCard from "./BlogCard"
-import { collection, getFirestore, onSnapshot, query } from "firebase/firestore"
-import firebase_app from "../../firebase/config"
+import { db } from "../../firebase/config"
+import { collection, onSnapshot, query } from "firebase/firestore"
 import { PageButtonLoader } from "../Button/buttonload"
 import { ArrowRightIcon } from "../icons/arrow-right"
 import Link from "next/link"
@@ -15,7 +15,7 @@ const BlogSectionHome = () => {
 
   useEffect(() => {
     setIsLoading(true)
-    const q = query(collection(getFirestore(firebase_app), "Article"))
+    const q = query(collection(db, "Article"))
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       const recipients: any[] = []
       querySnapshot.forEach((doc) => {
