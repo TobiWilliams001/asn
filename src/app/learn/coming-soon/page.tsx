@@ -17,7 +17,6 @@ function ComingSoonContent() {
   const searchParams = useSearchParams();
   const feature = searchParams.get('feature') || 'This feature';
 
-  // Map feature names to display text
   const featureNames: Record<string, string> = {
     asap: 'ASAP Program',
     resources: 'Resource Hub',

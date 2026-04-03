@@ -18,7 +18,7 @@ export default function ProcessingPage() {
       const data = await res.json();
 
       if (data.status && data.data.status === "success") {
-        setStatus("Donation successful! 🎉");
+        setStatus("Donation successful!");
       } else {
         setStatus("Verification failed or pending.");
       }
