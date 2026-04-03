@@ -1,6 +1,14 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { FOOTER_LINKS, SOCIAL_LINKS } from '@/lib/data/navigation';
+import { Linkedin, Instagram, Twitter, Youtube } from 'lucide-react';
+
+const SOCIAL_ICONS: Record<string, any> = {
+  Linkedin: Linkedin,
+  Instagram: Instagram,
+  Twitter: Twitter,
+  Youtube: Youtube,
+};
 
 export default function Footer() {
   return (
@@ -34,7 +42,10 @@ export default function Footer() {
                   aria-label={social.label}
                   className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] flex items-center justify-center text-[#b89d9f] hover:text-white hover:bg-white/10 hover:border-white/20 transition-all"
                 >
-                  <span className="text-sm leading-none">{social.icon}</span>
+                  {(() => {
+                    const Icon = SOCIAL_ICONS[social.icon];
+                    return Icon ? <Icon size={18} /> : null;
+                  })()}
                 </a>
               ))}
             </div>

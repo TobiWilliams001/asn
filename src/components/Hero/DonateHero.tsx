@@ -6,7 +6,7 @@ import DonateHerobody from '../Herobody/DonateHeroBody'
 const DonateHero = () => {
   return (
     <div className="relative bg-[#402527] w-full min-h-screen" id="home">
-        {/* ✅ Background Image */}
+        {/* Background Image */}
         <Image 
             src="/asn_bg.svg" 
             fill 
@@ -16,7 +16,7 @@ const DonateHero = () => {
             priority
         />
         
-        {/* ✅ Content Wrapper */}
+        {/* Content Wrapper */}
         <div className="relative w-full min-h-screen flex flex-col">
             <div className="max-w-[1440px] mx-auto lg:px-20 lg:py-8 md:p-10 p-6 w-full flex-grow flex flex-col">
                 <NavBar />

@@ -64,6 +64,7 @@ export default function NavBar() {
                 height={58}
                 priority
                 className="w-[80px] md:w-[100px] xl:w-[120px]"
+                style={{ height: 'auto' }}
               />
             </Link>
 
@@ -133,9 +134,9 @@ export default function NavBar() {
                 </div>
               )}
 
-              <a href="#donation" className="ml-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-6 py-2.5 rounded-full transition-all text-sm font-semibold">
+              <Link href="/#donation" className="ml-2 bg-white/5 hover:bg-white/10 border border-white/10 text-white px-6 py-2.5 rounded-full transition-all text-sm font-semibold">
                 Donate
-              </a>
+              </Link>
             </div>
 
             {/* Mobile: Hamburger  */}
@@ -205,9 +206,9 @@ export default function NavBar() {
                     <Link href="/learn/auth/signup" onClick={() => setOpenNav(false)} className="block gradient-bg hover:opacity-90 text-white px-4 py-3.5 rounded-xl text-base font-bold text-center transition-all shadow-lg">
                       Sign Up
                     </Link>
-                    <a href="#donation" onClick={() => setOpenNav(false)} className="block bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-3 rounded-xl text-base font-semibold text-center transition-all">
+                    <Link href="/#donation" onClick={() => setOpenNav(false)} className="block bg-white/5 hover:bg-white/10 border border-white/10 text-white px-4 py-3 rounded-xl text-base font-semibold text-center transition-all">
                       Donate
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
