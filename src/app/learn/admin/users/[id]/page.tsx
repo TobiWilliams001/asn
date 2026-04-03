@@ -8,25 +8,28 @@ import StatusBadge from '@/components/admin/StatusBadge';
 import ProgressBar from '@/components/modules/ProgressBar';
 import { getUserById, updateUserRole, deleteUser, UserProfile } from '@/services/adminService';
 import { getUserProgress, UserProgress } from '@/services/progressService';
-import { MOCK_MODULES } from '@/lib/data/mockModules';
+import { getAllModules, Module } from '@/services/moduleService';
 
 export default function UserDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
   const { id } = params;
   const [user, setUser] = useState<UserProfile | null>(null);
   const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [userData, progressData] = await Promise.all([
+        const [userData, progressData, modulesData] = await Promise.all([
           getUserById(id),
-          getUserProgress(id).catch(() => null) // Progress might not exist
+          getUserProgress(id).catch(() => null),
+          getAllModules()
         ]);
         setUser(userData);
         setProgress(progressData);
+        setModules(modulesData);
       } catch (error) {
         console.error('Error fetching user data:', error);
       } finally {
@@ -106,7 +109,7 @@ export default function UserDetailPage({ params }: { params: { id: string } }) {
   }
 
   const overallProgress = progress?.overallProgress || 0;
-  const modulesWithProgress = MOCK_MODULES.map(module => ({
+  const modulesWithProgress = modules.map(module => ({
     ...module,
     ...progress?.modules[module.id]
   }));

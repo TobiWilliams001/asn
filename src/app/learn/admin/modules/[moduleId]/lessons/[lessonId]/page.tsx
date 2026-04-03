@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -38,11 +38,7 @@ export default function EditLessonPage({ params }: { params: { moduleId: string;
   });
   const [resources, setResources] = useState<Resource[]>([]);
 
-  useEffect(() => {
-    fetchModuleAndLesson();
-  }, [moduleId, lessonId, isNew]);
-
-  async function fetchModuleAndLesson() {
+  const fetchModuleAndLesson = useCallback(async () => {
     try {
       const moduleData = await getModule(moduleId);
       if (moduleData) {
@@ -73,7 +69,11 @@ export default function EditLessonPage({ params }: { params: { moduleId: string;
     } finally {
       setLoading(false);
     }
-  }
+  }, [moduleId, lessonId, isNew]);
+
+  useEffect(() => {
+    fetchModuleAndLesson();
+  }, [fetchModuleAndLesson]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

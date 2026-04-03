@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { ArrowLeft, CheckCircle, XCircle, Loader2, Mail, Phone, MapPin, GraduationCap, FileText, Target } from 'lucide-react';
 import StatusBadge from '@/components/admin/StatusBadge';
 import { getApplication, approveApplication, rejectApplication, Application } from '@/services/adminService';
+import EmailTemplates from '@/components/admin/EmailTemplates';
 
 export default function ApplicationReviewPage({ params }: { params: { id: string } }) {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function ApplicationReviewPage({ params }: { params: { id: string
   const [loading, setLoading] = useState(true);
   const [processing, setProcessing] = useState(false);
   const [adminNotes, setAdminNotes] = useState('');
+  const [showEmailTemplate, setShowEmailTemplate] = useState<'acceptance' | 'rejection' | null>(null);
 
   useEffect(() => {
     async function fetchApplication() {
@@ -36,8 +38,8 @@ export default function ApplicationReviewPage({ params }: { params: { id: string
     setProcessing(true);
     try {
       await approveApplication(application.id, application.userId, adminNotes);
-      alert('Application approved! Student has been enrolled.');
-      router.push('/learn/admin/applications');
+      setShowEmailTemplate('acceptance');
+      alert('Application approved! Student has been enrolled. Don\'t forget to send the email below.');
     } catch (error) {
       console.error('Error approving application:', error);
       alert('Failed to approve application. Please try again.');
@@ -52,8 +54,8 @@ export default function ApplicationReviewPage({ params }: { params: { id: string
     setProcessing(true);
     try {
       await rejectApplication(application.id, application.userId, adminNotes);
-      alert('Application rejected.');
-      router.push('/learn/admin/applications');
+      setShowEmailTemplate('rejection');
+      alert('Application rejected. Consider sending the email below to provide closure.');
     } catch (error) {
       console.error('Error rejecting application:', error);
       alert('Failed to reject application. Please try again.');
@@ -267,6 +269,27 @@ export default function ApplicationReviewPage({ params }: { params: { id: string
                   )}
                 </button>
               </div>
+            </div>
+          )}
+
+          {/* Email Template (after approval/rejection) */}
+          {showEmailTemplate && application && (
+            <div className="bg-[#261c1c] border border-[#382929] rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-white">Email Applicant</h3>
+                <button
+                  onClick={() => router.push('/learn/admin/applications')}
+                  className="text-xs font-bold text-[#b89d9f] hover:text-white"
+                >
+                  Done →
+                </button>
+              </div>
+              <EmailTemplates
+                applicantName={application.personalInfo.fullName}
+                applicantEmail={application.personalInfo.email}
+                track={application.track}
+                type={showEmailTemplate}
+              />
             </div>
           )}
 
