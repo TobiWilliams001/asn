@@ -44,7 +44,7 @@ export interface UserProfile {
   email: string;
   fullName: string;
   role: 'free' | 'applicant' | 'enrolled' | 'admin';
-  asapStatus?: 'applicant' | 'enrolled' | 'rejected';
+  asapStatus?: 'none' | 'applicant' | 'enrolled' | 'rejected';
   asapApplicationId?: string;
   country?: string;
   institution?: string;

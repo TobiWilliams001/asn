@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FileText, Users, BookOpen, FolderOpen, LogOut } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, BookOpen, FolderOpen, BarChart3, LogOut, Megaphone } from 'lucide-react';
 
 const NAV_ITEMS = [
   {
@@ -29,6 +29,16 @@ const NAV_ITEMS = [
     label: 'Resources',
     href: '/learn/admin/resources',
     icon: FolderOpen,
+  },
+  {
+    label: 'Analytics',
+    href: '/learn/admin/analytics',
+    icon: BarChart3,
+  },
+  {
+    label: 'Announcements',
+    href: '/learn/admin/announcements',
+    icon: Megaphone,
   },
 ];
 
