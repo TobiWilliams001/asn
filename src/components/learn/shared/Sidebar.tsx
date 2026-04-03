@@ -19,10 +19,9 @@ const SIDEBAR_LINKS = [
   },
   {
     label: 'Resource Hub',
-    href: '/learn/coming-soon',
+    href: '/learn/resources',
     icon: BookOpen,
     description: 'Learning Materials',
-    badge: 'Coming Soon'
   },
   {
     label: 'Community',

@@ -1,8 +1,15 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useAuthContext } from '@/context/AuthContext';
 import ProtectedRoute from '@/components/ProtectedRoute';
+import { getUserProgress } from '@/services/progressService';
+import { getAllModules } from '@/services/moduleService';
+import type { UserProgress } from '@/services/progressService';
+import type { Module } from '@/services/moduleService';
+import { getAnnouncements } from '@/services/announcementService';
+import type { Announcement } from '@/services/announcementService';
 import {
   BookOpen,
   FolderOpen,
@@ -12,6 +19,10 @@ import {
   User,
   ChevronRight,
   Megaphone,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  TrendingUp,
 } from 'lucide-react';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -24,14 +35,7 @@ interface FeatureCard {
   accent: string;
 }
 
-interface Announcement {
-  id: number;
-  tag: string;
-  tagColor: string;
-  title: string;
-  body: string;
-  date: string;
-}
+// Types moved to announcementService.ts
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 const FEATURES: FeatureCard[] = [
@@ -47,8 +51,8 @@ const FEATURES: FeatureCard[] = [
     label: 'Resource Hub',
     description: 'Curated templates, guides, and toolkits to power your career.',
     icon: FolderOpen,
-    href: '/learn/coming-soon?feature=resources',
-    comingSoon: true,
+    href: '/learn/resources',
+    comingSoon: false,
     accent: '#ea2a33',
   },
   {
@@ -69,24 +73,7 @@ const FEATURES: FeatureCard[] = [
   },
 ];
 
-const ANNOUNCEMENTS: Announcement[] = [
-  {
-    id: 2,
-    tag: 'Update',
-    tagColor: 'bg-white/10 text-white',
-    title: 'New Resources Dropping Soon',
-    body: 'Resume templates, cover letter guides, and interview prep kits — coming to the Resource Hub.',
-    date: 'Feb 12, 2026',
-  },
-  {
-    id: 3,
-    tag: 'Cohort',
-    tagColor: 'bg-[#ea2a33]/15 text-[#ea2a33]',
-    title: 'Cohort 3 Applications Open',
-    body: 'Know someone ready to level up? Share the ASAP enrollment link with them.',
-    date: 'Feb 10, 2026',
-  },
-];
+// Fetched from Firestore now
 
 // ─── Profile Completion Helper ─────────────────────────────────────────────────
 function getProfileCompletion(userProfile: any, user: any): { percent: number; missing: string[] } {
@@ -102,9 +89,75 @@ function getProfileCompletion(userProfile: any, user: any): { percent: number; m
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
 
-function WelcomeBanner({ firstName }: { firstName: string }) {
+function ApplicationStatusCard({ status, applicationId }: { status?: string, applicationId?: string }) {
+  if (!applicationId || !status) return null;
+
+  const statusConfig: Record<string, any> = {
+    pending: {
+      icon: Clock,
+      label: 'Application Under Review',
+      sub: 'Our team is reviewing your application.',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10'
+    },
+    applicant: {
+      icon: Clock,
+      label: 'Application Under Review',
+      sub: 'Our team is reviewing your application.',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10'
+    },
+    accepted: {
+      icon: CheckCircle,
+      label: 'Accepted — Welcome to ASAP!',
+      sub: 'You have full access to the program modules.',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10'
+    },
+    enrolled: {
+      icon: CheckCircle,
+      label: 'Enrolled — Welcome to ASAP!',
+      sub: 'You have full access to the program modules.',
+      color: 'text-emerald-400',
+      bg: 'bg-emerald-500/10'
+    },
+    rejected: {
+      icon: AlertCircle,
+      label: 'Not Selected — Reapply Next Cohort',
+      sub: 'You can apply again when the next cohort opens.',
+      color: 'text-[#b89d9f]',
+      bg: 'bg-white/5'
+    }
+  };
+
+  const config = statusConfig[status as string] || statusConfig.pending;
+  const Icon = config.icon;
+
+  return (
+    <div className="mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5">
+      <div className="flex items-center gap-4">
+        <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.bg}`}>
+          <Icon className={config.color} size={24} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-white">{config.label}</h3>
+          <p className="text-sm text-[#b89d9f]">{config.sub}</p>
+        </div>
+        <Link
+          href="/learn/asap/application-status"
+          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold text-white transition-all hover:bg-white/10"
+        >
+          Check Status
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+function WelcomeBanner({ firstName, status }: { firstName: string, status?: string }) {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const isEnrolled = status === 'enrolled' || status === 'accepted';
 
   return (
     <div className="relative overflow-hidden rounded-2xl border border-white/[0.07] bg-gradient-to-br from-[#1f1212] via-[#261818] to-[#1a1010] px-8 py-8 md:py-10">
@@ -119,17 +172,24 @@ function WelcomeBanner({ firstName }: { firstName: string }) {
             {firstName}
           </h1>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-[#b89d9f]">
-            We&apos;re building something powerful for you. Programs, resources, mentors, and community — all coming together in one place.
+            {isEnrolled 
+              ? "Welcome back! Ready to continue your journey? Dive back into your modules and accelerate your growth."
+              : "We're building something powerful for you. Programs, resources, mentors, and community — all coming together in one place."
+            }
           </p>
         </div>
 
-        <Link
-          href="/learn/profile"
-          className="mt-4 inline-flex items-center gap-2 self-start rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-semibold text-white transition-all hover:bg-white/10 md:mt-0 md:self-auto"
-        >
-          View Profile
-          <ArrowRight size={15} />
-        </Link>
+        <div className="flex flex-wrap gap-3 mt-4 md:mt-0">
+          {isEnrolled && (
+            <Link
+              href="/learn/asap/modules"
+              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#CC2630] to-[#ea2a33] px-5 py-2.5 text-sm font-bold text-white transition-all hover:shadow-lg hover:shadow-[#ea2a33]/20"
+            >
+              Go to Modules
+              <ArrowRight size={15} />
+            </Link>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -181,18 +241,25 @@ function ProfileNudge({
   );
 }
 
-function FeatureGrid() {
+function FeatureGrid({ status }: { status?: string }) {
+  const features = FEATURES.map(f => {
+    if (f.label === 'ASAP Program' && status === 'enrolled') {
+      return { ...f, href: '/learn/asap/modules', description: 'Access your learning modules and track your program progress.' };
+    }
+    return f;
+  });
+
   return (
     <div>
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h2 className="text-lg font-bold text-white">Explore ASN Learn</h2>
-          <p className="text-sm text-[#b89d9f]">Everything you need to grow your career — coming soon</p>
+          <p className="text-sm text-[#b89d9f]">Everything you need to grow your career</p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        {FEATURES.map((feature) => {
+        {features.map((feature) => {
           const Icon = feature.icon;
           return (
             <Link
@@ -246,6 +313,23 @@ function FeatureGrid() {
 }
 
 function AnnouncementsPanel() {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchAnnouncements() {
+      try {
+        const data = await getAnnouncements();
+        setAnnouncements(data);
+      } catch (error) {
+        console.error('Error fetching announcements:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchAnnouncements();
+  }, []);
+
   return (
     <div>
       <div className="mb-5 flex items-center gap-2">
@@ -254,22 +338,102 @@ function AnnouncementsPanel() {
       </div>
 
       <div className="space-y-3">
-        {ANNOUNCEMENTS.map((ann) => (
-          <div
-            key={ann.id}
-            className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 transition-all hover:border-white/[0.1]"
-          >
-            <div className="mb-2.5 flex items-center gap-2">
-              <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${ann.tagColor}`}>
-                {ann.tag}
-              </span>
-              <span className="text-xs text-[#b89d9f]/60">{ann.date}</span>
+        {loading ? (
+          [1, 2].map(i => (
+            <div key={i} className="h-24 bg-white/[0.03] border border-white/[0.06] rounded-2xl animate-pulse" />
+          ))
+        ) : announcements.length > 0 ? (
+          announcements.map((ann) => (
+            <div
+              key={ann.id}
+              className="rounded-2xl border border-white/[0.06] bg-white/[0.03] p-5 transition-all hover:border-white/[0.1]"
+            >
+              <div className="mb-2.5 flex items-center gap-2">
+                <span className={`rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider ${ann.tagColor}`}>
+                  {ann.tag}
+                </span>
+                <span className="text-xs text-[#b89d9f]/60">{ann.date}</span>
+              </div>
+              <h4 className="mb-1 text-sm font-bold text-white">{ann.title}</h4>
+              <p className="text-xs leading-relaxed text-[#b89d9f]">{ann.body}</p>
             </div>
-            <h4 className="mb-1 text-sm font-bold text-white">{ann.title}</h4>
-            <p className="text-xs leading-relaxed text-[#b89d9f]">{ann.body}</p>
+          ))
+        ) : (
+          <div className="p-8 text-center bg-white/[0.02] rounded-2xl border border-dashed border-white/[0.06]">
+            <p className="text-xs text-[#b89d9f]/40 uppercase font-black tracking-widest">No Updates</p>
           </div>
-        ))}
+        )}
       </div>
+    </div>
+  );
+}
+
+// ─── Program Progress Card (for enrolled students) ─────────────────────────────
+function ProgramProgressCard({ userId }: { userId: string }) {
+  const [progress, setProgress] = useState<UserProgress | null>(null);
+  const [modules, setModules] = useState<Module[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProgress() {
+      try {
+        const [progressData, modulesData] = await Promise.all([
+          getUserProgress(userId),
+          getAllModules()
+        ]);
+        setProgress(progressData);
+        setModules(modulesData.filter(m => m.published));
+      } catch (error) {
+        console.error('Error fetching progress:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProgress();
+  }, [userId]);
+
+  if (loading || !progress) return null;
+
+  const overallProgress = progress.overallProgress || 0;
+  const completedCount = modules.filter(m => progress.modules[m.id]?.status === 'completed').length;
+  const activeModule = modules.find(m => progress.modules[m.id]?.status === 'in-progress');
+
+  return (
+    <div className="mb-6 rounded-2xl border border-white/[0.06] bg-white/[0.03] p-6">
+      <div className="flex items-center gap-3 mb-4">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#ea2a33]/10">
+          <TrendingUp className="text-[#ea2a33]" size={20} />
+        </div>
+        <div className="flex-1">
+          <h3 className="font-bold text-white text-sm">Program Progress</h3>
+          <p className="text-xs text-[#b89d9f]">{completedCount}/{modules.length} Modules Completed</p>
+        </div>
+        <span className="text-2xl font-black text-white">{overallProgress}%</span>
+      </div>
+
+      {/* Progress bar */}
+      <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.06] mb-4">
+        <div
+          className="h-full rounded-full bg-gradient-to-r from-[#CC2630] to-[#ea2a33] transition-all duration-700"
+          style={{ width: `${overallProgress}%` }}
+        />
+      </div>
+
+      {/* Active module + CTA */}
+      {activeModule && (
+        <div className="flex items-center justify-between">
+          <p className="text-xs text-[#b89d9f]">
+            Currently on: <span className="text-white font-semibold">{activeModule.title}</span>
+          </p>
+          <Link
+            href="/learn/asap/modules"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-[11px] font-bold text-white transition-all hover:bg-white/10"
+          >
+            Continue Learning
+            <ArrowRight size={12} />
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
@@ -284,6 +448,7 @@ function DashboardContent() {
     : user?.email?.split('@')[0] || 'there';
 
   const { percent, missing } = getProfileCompletion(userProfile, user);
+  const isEnrolled = userProfile?.asapStatus === 'enrolled';
 
   return (
     <div className="min-h-screen text-white">
@@ -291,8 +456,19 @@ function DashboardContent() {
 
         {/* Welcome Banner */}
         <div className="mb-6">
-          <WelcomeBanner firstName={firstName} />
+          <WelcomeBanner firstName={firstName} status={userProfile?.asapStatus} />
         </div>
+
+        {/* Application Status Card */}
+        <ApplicationStatusCard
+          status={userProfile?.asapStatus}
+          applicationId={userProfile?.asapApplicationId}
+        />
+
+        {/* Program Progress (for enrolled students) */}
+        {isEnrolled && user?.uid && (
+          <ProgramProgressCard userId={user.uid} />
+        )}
 
         {/* Profile nudge (hidden when 100%) */}
         <div className="mb-6">
@@ -303,7 +479,7 @@ function DashboardContent() {
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           {/* Left: Feature cards (2/3 width) */}
           <div className="lg:col-span-2">
-            <FeatureGrid />
+            <FeatureGrid status={userProfile?.asapStatus} />
           </div>
 
           {/* Right: Announcements (1/3 width) */}
